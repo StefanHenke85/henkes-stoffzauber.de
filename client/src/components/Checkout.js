@@ -4,12 +4,7 @@ import axios from 'axios';
 import './Checkout.css';
 
 // === KORREKTUREN FÜR DAS DEPLOYMENT ===
-// Wir verwenden nur den Pfad /api, Nginx leitet an Port 3001 weiter.
 const API_CHECKOUT_URL = '/api/checkout';
-// Da der Rechnungs-Download-Link vom Backend kommt, müssen wir den Host hier NICHT hinzufügen,
-// da der Browser automatisch die aktuelle Domain verwendet, wenn der Pfad mit / (root) beginnt.
-// Allerdings benötigen wir in diesem Fall den Pfad /api, da der Server die Rechnung dynamisch generiert.
-// Der Server liefert die Rechnung über den Pfad /api/invoices/... aus.
 // ========================================
 
 const Checkout = () => {
@@ -38,13 +33,20 @@ const Checkout = () => {
         setLoading(true);
 
         try {
-            // Korrigierter API-Aufruf: Verwendet nur den relativen Pfad /api/checkout
             const res = await axios.post(API_CHECKOUT_URL, {
                 cart: cartItems,
                 address,
                 paymentMethod
             });
 
+            // 🛑 NEU: PAYPAL WEITERLEITUNGS-LOGIK
+            if (res.data.approvalUrl) {
+                // Wenn der Server eine Genehmigungs-URL zurückgibt, den Benutzer sofort weiterleiten
+                window.location.href = res.data.approvalUrl;
+                return; // Stoppe hier, damit der restliche Code (setOrderResult, clearCart) nicht ausgeführt wird
+            }
+
+            // Normale Abwicklung (z.B. bei Zahlungsmethode 'Rechnung')
             setOrderResult(res.data);
             clearCart();
         } catch (err) {
@@ -122,8 +124,6 @@ const Checkout = () => {
             </form>
 
             {orderResult?.invoicePath && (
-                // Korrigierter Download-Link: Entfernt http://localhost:3001
-                // Der Pfad, z.B. /api/invoices/rechnung_123.pdf, wird relativ zur Domain geladen.
                 <a className="checkout-download" href={orderResult.invoicePath} target="_blank" rel="noreferrer">
                     Rechnung herunterladen 💖
                 </a>
