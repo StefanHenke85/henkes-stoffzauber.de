@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'; 
-import { Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'; 
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'; 
 
 import Home from './components/Home';
 import Shop from './components/Shop';
@@ -8,12 +8,14 @@ import AdminLogin from './components/AdminLogin';
 import ProductDetail from './components/ProductDetail';
 import Stoffe from './components/Stoffe';
 import Checkout from './components/Checkout';
-// 🛑 NEUE IMPORT-ROUTEN FÜR ZAHLUNGSSTATUS
-import Success from './components/Success'; 
-import Cancel from './components/Cancel'; 
+// 🛑 KORREKTUR: Importpfade auf den aktuellen Ordner ('./') angepasst,
+// da Success.js und Cancel.js direkt in client/src/ liegen.
+import Success from './Success'; 
+import Cancel from './Cancel'; 
 
 import logoAsset from './assets/logo.jpg';
 import { CartProvider } from './components/CartContext';
+// Import für CSS hinzugefügt, falls nicht vorhanden
 import './App.css';
 
 const ProductDetailWrapper = () => {
@@ -83,7 +85,7 @@ function App() {
                         <Route path="/stoffe" element={<Stoffe />} />
                         <Route path="/checkout" element={<Checkout />} />
                         
-                        {/* 🛑 NEUE PAYPAL RÜCKKEHR-ROUTEN */}
+                        {/* NEUE PAYPAL RÜCKKEHR-ROUTEN */}
                         <Route path="/checkout/success" element={<Success />} />
                         <Route path="/checkout/cancel" element={<Cancel />} />
                         
