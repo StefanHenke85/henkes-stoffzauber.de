@@ -1,7 +1,8 @@
 // client/src/components/AdminDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { LogOut, Edit, Trash2 } from 'lucide-react';
-import '../index.css';
+import './AdminDashboard.css';
+
 
 const API_URL = 'http://localhost:3001/api';
 const BACKEND_URL = 'http://localhost:3001';
