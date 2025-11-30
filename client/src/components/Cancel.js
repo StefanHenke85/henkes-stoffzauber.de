@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from './components/CartContext'; 
+// 🛑 KORREKTUR: Der Pfad muss './CartContext' sein, da sich beide Dateien
+// im selben Ordner (/client/src/components/) befinden.
+import { useCart } from './CartContext'; 
 
 const Cancel = () => {
     // Stellen Sie sicher, dass CartContext verfügbar ist, um die Artikelanzahl zu zeigen
