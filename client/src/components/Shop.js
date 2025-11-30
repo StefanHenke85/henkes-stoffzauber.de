@@ -83,6 +83,8 @@ const Shop = () => {
   return (
     <div className="shop-container" style={{ paddingTop: '100px' }}>
       <h1 className="shop-title">Schau dich um ✨</h1>
+      <h2> "alle artikel sind noch beispiele !!!" </h2>
+      <h2> "noch ist es kein Shop" </h2>
 
       <input className="search-input" placeholder="Suche ..." value={search} onChange={e => setSearch(e.target.value)} />
 

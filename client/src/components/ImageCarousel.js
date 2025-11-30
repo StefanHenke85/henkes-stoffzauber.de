@@ -1,16 +1,23 @@
 // src/components/ImageCarousel.js
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:3001/api/products/featured'; // Backend-URL
-const BACKEND_URL = 'http://localhost:3001';
+// === KORREKTUREN FÜR DAS DEPLOYMENT ===
+// 1. API_URL: Nur noch den relativen Pfad verwenden, Nginx leitet diesen an Port 3001 weiter.
+const API_URL = '/api/products/featured'; 
+// 2. BACKEND_URL: Wird leer gelassen, damit die Domain (henkes-stoffzauber.de) automatisch verwendet wird.
+const BACKEND_URL = ''; 
+// ========================================
 
 /**
  * Hilfsfunktion: Korrigiert Bildpfade, die vom Backend kommen.
  */
 const getImageUrl = (imagePath) => {
+    // Da wir Nginx so konfigurieren, dass es /uploads/ direkt ausliefert,
+    // geben wir den Pfad 1:1 zurück, um die korrekte URL auf der Domain zu erzeugen.
     if (imagePath && imagePath.startsWith('/uploads/')) {
-        return `${BACKEND_URL}${imagePath}`;
+        return imagePath;
     }
+    // Fallback oder bereits korrekte Pfade
     return imagePath;
 };
 
@@ -24,7 +31,8 @@ const ImageCarousel = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch(API_URL);
+                // Verwendet den korrigierten relativen API_URL
+                const response = await fetch(API_URL); 
                 if (!response.ok) throw new Error(`Netzwerkfehler: ${response.status}`);
                 const data = await response.json();
                 setProducts(data.filter(p => p.stock > 0 && p.isFeatured)); // Nur echte Featured-Produkte

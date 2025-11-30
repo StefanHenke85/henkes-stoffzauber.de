@@ -1,2 +1,3 @@
 Add-Content -Path .gitignore -Value "server/.env"
 Add-Content -Path .gitignore -Value ".env"
+node_modules/
