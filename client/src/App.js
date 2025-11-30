@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect } from 'react'; 
 import { Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'; 
 
@@ -9,6 +8,10 @@ import AdminLogin from './components/AdminLogin';
 import ProductDetail from './components/ProductDetail';
 import Stoffe from './components/Stoffe';
 import Checkout from './components/Checkout';
+// 🛑 NEUE IMPORT-ROUTEN FÜR ZAHLUNGSSTATUS
+import Success from './components/Success'; 
+import Cancel from './components/Cancel'; 
+
 import logoAsset from './assets/logo.jpg';
 import { CartProvider } from './components/CartContext';
 import './App.css';
@@ -79,6 +82,11 @@ function App() {
                         <Route path="/shop/:productId" element={<ProductDetailWrapper />} />
                         <Route path="/stoffe" element={<Stoffe />} />
                         <Route path="/checkout" element={<Checkout />} />
+                        
+                        {/* 🛑 NEUE PAYPAL RÜCKKEHR-ROUTEN */}
+                        <Route path="/checkout/success" element={<Success />} />
+                        <Route path="/checkout/cancel" element={<Cancel />} />
+                        
                         <Route path="/admin" element={<AdminProtectedRoute />} />
                         <Route path="*" element={<h2 className="not-found">404 - Seite nicht gefunden</h2>} />
                     </Routes>
