@@ -1,3 +1,56 @@
-Add-Content -Path .gitignore -Value "server/.env"
-Add-Content -Path .gitignore -Value ".env"
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+server/.env
+api/.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+coverage/
+
+# Uploads (production data)
+uploads/
+invoices/
+
+# SSL certificates
+nginx/ssl/
+
+# Backup
+*.backup
+backup/
+henkes-stoffzauber.de.backup/
+
+# Misc
+.cache/
+.temp/
+*.tgz

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "1764160612693",
+    "name": "Test2",
+    "description": "Ein schöner Fleece-Stoff",
+    "fabricType": "Fleece",
+    "imageUrl": "/uploads/1764160612690-carousel4.jpg",
+    "imageUrlWebp": "",
+    "thumbnailUrl": "",
+    "color": "",
+    "pattern": "",
+    "material": "Polyester",
+    "width": 150,
+    "isActive": true,
+    "isFeatured": true,
+    "createdAt": "2025-11-29T10:00:00.000Z",
+    "updatedAt": "2025-11-29T10:00:00.000Z"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "username": "admin",
+    "email": "henke.stefan1985@gmail.com",
+    "passwordHash": "$2a$12$mlKGEi6UbkXrv4LysRciZe4Oo85.IN/T6u0/lYoRNXPt30YQwU3eS",
+    "role": "superadmin",
+    "isActive": true,
+    "id": "1764541111126",
+    "createdAt": "2025-11-30T22:18:31.123Z",
+    "updatedAt": "2025-11-30T22:21:08.019Z",
+    "lastLogin": "2025-11-30T22:21:08.018Z"
+  }
+]

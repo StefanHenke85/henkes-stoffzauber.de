@@ -1,0 +1,107 @@
+[
+  {
+    "id": "1764439674157",
+    "orderNumber": "HS-20251129-001",
+    "status": "new",
+    "paymentStatus": "pending",
+    "paymentMethod": "prepayment",
+    "items": [
+      {
+        "productId": "1764276141647",
+        "name": "VERSUCH",
+        "price": 1,
+        "quantity": 1
+      },
+      {
+        "productId": "1764093497227.8489",
+        "name": "Loop für Jungs",
+        "price": 15,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 16,
+    "shipping": 0,
+    "total": 16,
+    "customer": {
+      "firstName": "Maik",
+      "lastName": "Downar",
+      "email": "maikmaltedownar@gmail.com",
+      "phone": "01778470506"
+    },
+    "shippingAddress": {
+      "street": "Am Geldermannshoif",
+      "houseNumber": "2",
+      "zip": "47443",
+      "city": "Moers",
+      "country": "Deutschland"
+    },
+    "createdAt": "2025-11-29T18:07:54.157Z",
+    "updatedAt": "2025-11-29T18:07:54.157Z"
+  },
+  {
+    "id": "1764442936739",
+    "orderNumber": "HS-20251129-002",
+    "status": "new",
+    "paymentStatus": "pending",
+    "paymentMethod": "prepayment",
+    "items": [
+      {
+        "productId": "1764093497227.8489",
+        "name": "Loop für Jungs",
+        "price": 15,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 15,
+    "shipping": 0,
+    "total": 15,
+    "customer": {
+      "firstName": "Andrea",
+      "lastName": "Henke",
+      "email": "a.henke@gmx.de",
+      "phone": "01780815"
+    },
+    "shippingAddress": {
+      "street": "Rheinstraße",
+      "houseNumber": "40",
+      "zip": "47495",
+      "city": "Rheinberg",
+      "country": "Deutschland"
+    },
+    "createdAt": "2025-11-29T19:02:16.739Z",
+    "updatedAt": "2025-11-29T19:02:16.739Z"
+  },
+  {
+    "id": "1764498555479",
+    "orderNumber": "HS-20251130-001",
+    "status": "new",
+    "paymentStatus": "pending",
+    "paymentMethod": "prepayment",
+    "items": [
+      {
+        "productId": "1764276141647",
+        "name": "VERSUCH",
+        "price": 1,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 1,
+    "shipping": 0,
+    "total": 1,
+    "customer": {
+      "firstName": "stefan",
+      "lastName": "henke",
+      "email": "henke.stefan1985@gmail.com",
+      "phone": "01788715208"
+    },
+    "shippingAddress": {
+      "street": "Rheinstraße",
+      "houseNumber": "40",
+      "zip": "47495",
+      "city": "rheinberg",
+      "country": "Deutschland"
+    },
+    "createdAt": "2025-11-30T10:29:15.479Z",
+    "updatedAt": "2025-11-30T10:29:15.479Z"
+  }
+]
