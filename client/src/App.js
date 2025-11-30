@@ -8,10 +8,10 @@ import AdminLogin from './components/AdminLogin';
 import ProductDetail from './components/ProductDetail';
 import Stoffe from './components/Stoffe';
 import Checkout from './components/Checkout';
-// 🛑 KORREKTUR: Importpfade auf den aktuellen Ordner ('./') angepasst,
-// da Success.js und Cancel.js direkt in client/src/ liegen.
-import Success from './Success'; 
-import Cancel from './Cancel'; 
+// 🛑 KORREKTUR: Importpfade auf den components/-Ordner zurückgesetzt,
+// da die Dateien Success.js und Cancel.js dort liegen.
+import Success from './components/Success'; 
+import Cancel from './components/Cancel'; 
 
 import logoAsset from './assets/logo.jpg';
 import { CartProvider } from './components/CartContext';

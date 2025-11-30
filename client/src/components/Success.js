@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom'; // 🛑 'Link' hinzugefügt
+import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 
 // 🛑 Backend-Endpoint zur Abschließung der PayPal-Zahlung

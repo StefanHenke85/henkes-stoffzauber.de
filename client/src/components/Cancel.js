@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // 🛑 'Link' hinzugefügt
-import { useCart } from './CartContext'; 
+import { Link } from 'react-router-dom';
+import { useCart } from './components/CartContext'; 
 
 const Cancel = () => {
     // Stellen Sie sicher, dass CartContext verfügbar ist, um die Artikelanzahl zu zeigen
