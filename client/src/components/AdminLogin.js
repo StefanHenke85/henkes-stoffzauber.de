@@ -1,7 +1,10 @@
 // src/components/AdminLogin.js
 import React, { useState } from 'react';
 
-const API_URL = 'http://localhost:3001/api';
+// === KORREKTUR FÜR DAS DEPLOYMENT ===
+// API_URL: Nur noch den relativen Pfad verwenden. Nginx leitet /api an Port 3001 weiter.
+const API_URL = '/api';
+// ========================================
 
 const AdminLogin = ({ onLogin }) => {
     const [password, setPassword] = useState('');
@@ -14,6 +17,7 @@ const AdminLogin = ({ onLogin }) => {
         setLoading(true);
 
         try {
+            // Der Aufruf wird zu /api/admin/login
             const res = await fetch(`${API_URL}/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -21,7 +25,9 @@ const AdminLogin = ({ onLogin }) => {
             });
 
             if (!res.ok) {
-                throw new Error('Falsches Passwort');
+                // Versuche, eine spezifischere Fehlermeldung vom Backend zu erhalten
+                const errorData = await res.json().catch(() => ({ message: 'Falsches Passwort' }));
+                throw new Error(errorData.message || 'Falsches Passwort');
             }
 
             const data = await res.json();
