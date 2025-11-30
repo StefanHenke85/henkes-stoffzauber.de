@@ -66,11 +66,14 @@ export function Home() {
             </div>
 
             <div className="flex-1 flex justify-center">
-              <img
-                src="/logo.jpg"
-                alt="Henkes Stoffzauber Logo"
-                className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-2xl border-4 border-white object-cover animate-float"
-              />
+              <div className="relative w-64 h-64 md:w-80 md:h-80 animate-float">
+                <div className="absolute inset-0 rounded-full bg-white shadow-2xl"></div>
+                <img
+                  src="/logo.jpg"
+                  alt="Henkes Stoffzauber Logo"
+                  className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] rounded-full object-contain bg-white"
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ShoppingBag, Truck, CreditCard, ArrowLeft, Loader2 } from 'lucide-react';
+import { ShoppingBag, Truck, CreditCard, ArrowLeft, Loader2, Plus, Minus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCart } from '@/contexts/CartContext';
 import { ordersApi } from '@/utils/api';
@@ -10,7 +10,7 @@ import type { Customer } from '@/types';
 
 export function Checkout() {
   const navigate = useNavigate();
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, addItem, decreaseQuantity, removeItem } = useCart();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'invoice' | 'prepayment'>('paypal');
 
@@ -368,21 +368,50 @@ export function Checkout() {
 
                 <ul className="space-y-4 mb-6">
                   {items.map((item) => (
-                    <li key={item.id} className="flex gap-3">
+                    <li key={item.id} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
                       <img
                         src={item.imageUrl || 'https://placehold.co/80x80/F2B2B4/ffffff'}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
-                      <div className="flex-grow">
+                      <div className="flex-grow min-w-0">
                         <p className="font-medium text-neutral-800 line-clamp-1">
                           {item.name}
                         </p>
-                        <p className="text-sm text-neutral-500">
-                          {item.quantity} x {formatCurrency(item.price)}
+                        <p className="text-sm text-neutral-500 mb-2">
+                          {formatCurrency(item.price)} pro Stück
                         </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => decreaseQuantity(item.id)}
+                            className="p-1 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                            aria-label="Menge verringern"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="font-semibold min-w-[2ch] text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => addItem(item, 1)}
+                            className="p-1 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                            aria-label="Menge erhöhen"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="p-1 ml-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+                            aria-label="Artikel entfernen"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <p className="font-semibold text-neutral-800">
+                      <p className="font-semibold text-neutral-800 whitespace-nowrap">
                         {formatCurrency(item.price * item.quantity)}
                       </p>
                     </li>
