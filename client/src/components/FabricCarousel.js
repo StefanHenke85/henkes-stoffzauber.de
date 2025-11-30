@@ -1,14 +1,21 @@
 // src/components/FabricCarousel.js
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:3001/api/fabrics/featured';
-const BACKEND_URL = 'http://localhost:3001';
+// === KORREKTUREN FÜR DAS DEPLOYMENT ===
+// 1. API_URL: Nur noch den relativen Pfad verwenden. Nginx leitet /api/fabrics/featured an Port 3001 weiter.
+const API_URL = '/api/fabrics/featured';
+// 2. BACKEND_URL: Wird leer gelassen, da Bilder nun über Nginx ausgeliefert werden.
+const BACKEND_URL = '';
+// ========================================
+
 const FALLBACK_IMAGE_URL = "https://placehold.co/500x500/F2B2B4/4F3C3C?text=Stoff";
 
 // Hilfsfunktion: Backend-Pfad korrigieren
 const getImageUrl = (imagePath) => {
+    // Da Nginx den Pfad /uploads/ direkt auf das Verzeichnis mappt,
+    // geben wir den Pfad 1:1 zurück, ohne den Host (BACKEND_URL).
     if (imagePath && imagePath.startsWith('/uploads/')) {
-        return `${BACKEND_URL}${imagePath}`;
+        return imagePath;
     }
     return imagePath;
 };
@@ -23,6 +30,7 @@ const FabricCarousel = () => {
     useEffect(() => {
         const fetchFabrics = async () => {
             try {
+                // Fetch verwendet den relativen Pfad /api/fabrics/featured
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error(`Netzwerkfehler: ${response.status}`);
                 const data = await response.json();
