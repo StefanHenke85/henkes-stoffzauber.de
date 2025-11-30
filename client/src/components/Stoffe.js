@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import './Stoffe.css';
 
-const API_URL = 'http://localhost:3001/api/fabrics';
-const BACKEND_URL = 'http://localhost:3001';
+// === KORREKTUREN FÜR DAS DEPLOYMENT ===
+// 1. API_URL: Nur noch den relativen Pfad verwenden. Nginx leitet /api/fabrics an Port 3001 weiter.
+const API_URL = '/api/fabrics';
+// 2. BACKEND_URL: Wird leer gelassen, da Bilder nun über Nginx ausgeliefert werden.
+const BACKEND_URL = ''; 
+// ========================================
+
 const FALLBACK_IMAGE = "https://placehold.co/600x600/F2B2B4/4F3C3C?text=Stoff";
 
 const getImageUrl = (path) => {
     if (path && path.startsWith('/uploads/')) {
-        return BACKEND_URL + path;
+        // Da Nginx den Pfad /uploads/ direkt auf das Verzeichnis mappt,
+        // geben wir den Pfad 1:1 zurück, ohne den Host (BACKEND_URL).
+        return path;
     }
     return path;
 };
@@ -19,6 +26,7 @@ const Stoffe = () => {
     useEffect(() => {
         const fetchFabrics = async () => {
             try {
+                // Fetch verwendet den relativen Pfad /api/fabrics
                 const res = await fetch(API_URL);
                 const data = await res.json();
                 setFabrics(data);
