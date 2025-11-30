@@ -1,90 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
-
-// 🛑 Backend-Endpoint zur Abschließung der PayPal-Zahlung
-const API_CAPTURE_URL = '/api/paypal/capture';
+import { useNavigate } from 'react-router-dom';
 
 const Success = () => {
-    const [searchParams] = useSearchParams();
-    const [status, setStatus] = useState('wird verarbeitet...');
-    const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [info, setInfo] = useState(null);
+  const navigate = useNavigate();
 
-    // PayPal sendet die OrderID (token) und PayerID zurück
-    const orderID = searchParams.get('token');
-    const payerID = searchParams.get('PayerID');
+  useEffect(() => {
+    const fetchCapture = async () => {
+      setLoading(true);
+      // PayPal returns token or orderId param (depends) — try common names
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token') || params.get('orderId') || params.get('PayerID') || null;
+      const localOrderId = sessionStorage.getItem('pendingOrderId') || null;
 
-    useEffect(() => {
-        // Clear the cart here if needed, once payment is confirmed
-        // For now, we rely on the server side to handle order finalization.
-    }, []);
+      if (!token) {
+        setInfo({ success:false, message:'Keine PayPal-Token in URL gefunden.' });
+        setLoading(false);
+        return;
+      }
 
-    useEffect(() => {
-        if (!orderID || !payerID) {
-            setError("Fehlende PayPal-Bestellinformationen.");
-            setStatus('Fehler');
-            return;
+      try {
+        const res = await axios.post('/api/paypal/capture', { orderID: token, localOrderId });
+        if (res.data?.success) {
+          // clear pending
+          sessionStorage.removeItem('pendingOrderId');
+          setInfo({ success:true, msg:'Zahlung erfolgreich. Danke!' });
+        } else {
+          setInfo({ success:false, msg: res.data?.error || 'Capture fehlgeschlagen' });
         }
-        
-        // Zahlung abschließen (Capture)
-        const capturePayment = async () => {
-            try {
-                setStatus('Zahlung wird abgeschlossen...');
-                
-                // Wir senden die OrderID an den Backend-Endpoint
-                const res = await axios.post(API_CAPTURE_URL, { orderID });
+      } catch (err) {
+        console.error(err);
+        setInfo({ success:false, msg: err?.response?.data?.error || 'Fehler beim Abschließen der Zahlung' });
+      } finally { setLoading(false); }
+    };
+    fetchCapture();
+  }, [navigate]);
 
-                if (res.data.success && res.data.captureStatus === 'COMPLETED') {
-                    setStatus('Zahlung erfolgreich abgeschlossen! 🎉');
-                    // 💡 Hier könnten Sie auch den Warenkorb leeren, da die Zahlung bestätigt wurde
-                    // setCartItems([]); 
-                } else {
-                    setError(`Zahlungsstatus: ${res.data.captureStatus || 'Unbekannt'}. Bitte den Administrator kontaktieren.`);
-                    setStatus('Fehler beim Abschluss');
-                }
+  if (loading) return <div style={{padding:20}}>Verarbeite Zahlung…</div>;
 
-            } catch (err) {
-                console.error("Capture Error:", err);
-                setError("Es gab ein Problem beim Abschließen der Zahlung. Bitte wenden Sie sich an den Kundenservice.");
-                setStatus('Serverfehler');
-            }
-        };
-
-        capturePayment();
-    }, [orderID, payerID]);
-
-    return (
-        <div className="checkout-container text-center">
-            <h2 className={`text-2xl font-bold p-4 rounded-lg shadow-md ${error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                Zahlungsbestätigung
-            </h2>
-            <div className="p-6 bg-white rounded-lg shadow-xl mt-4">
-                <p className="text-xl font-medium mb-4">Status: <span className="font-semibold">{status}</span></p>
-                
-                {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-md mt-4">
-                        <p className="font-bold">Fehler:</p>
-                        <p>{error}</p>
-                    </div>
-                )}
-
-                {!error && status === 'Zahlung erfolgreich abgeschlossen! 🎉' && (
-                    <div className="mt-6">
-                        <p className="text-gray-600">Vielen Dank für Ihre Bestellung! Eine Bestätigung und die Rechnung wurden per E-Mail an Sie versandt.</p>
-                    </div>
-                )}
-                
-                <div className="mt-8 space-x-4">
-                    <Link to="/shop" className="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150">
-                        Weiter einkaufen
-                    </Link>
-                    <Link to="/" className="inline-block px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition duration-150">
-                        Zur Startseite
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
+  return (
+    <div style={{padding:20, textAlign:'center'}}>
+      {info?.success ? (
+        <>
+          <h2>Vielen Dank — Zahlung erhalten 🎉</h2>
+          <p>Deine Bestellung wurde erfolgreich abgeschlossen.</p>
+          <button onClick={()=>window.location.href = '/'}>Zur Startseite</button>
+        </>
+      ) : (
+        <>
+          <h2>Fehler bei der Zahlung</h2>
+          <p>{info?.msg || 'Unbekannter Fehler'}</p>
+          <button onClick={()=>window.location.href = '/checkout'}>Zurück zur Kasse</button>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default Success;
