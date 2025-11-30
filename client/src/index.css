@@ -1,0 +1,212 @@
+/* ==================================================== */
+/* Henkes-Stoffzauber - Sauberes Basis-CSS             */
+/* ==================================================== */
+
+/* 1. Farbpalette & Typografie */
+:root {
+    --farbe-akzent: #F2B2B4;
+    --farbe-mint: #C7E9D6;
+    --farbe-text: #4F3C3C;
+    --farbe-hintergrund: #FAF8F5;
+    --farbe-hell: #FFFFFF;
+    --farbe-primär: #5A4747;
+    --farbe-sekundär: #A0C2B8;
+    --farbe-rot: #d9534f;
+    --farbe-gruen: #5cb85c;
+    --farbe-blau: #5bc0de;
+    --farbe-schatten: rgba(0, 0, 0, 0.1);
+    --schrift-haupt: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 2. Globale Einstellungen */
+body {
+    margin: 0;
+    font-family: var(--schrift-haupt);
+    color: var(--farbe-text);
+    min-height: 100vh;
+    background-image: url('./assets/banner.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: var(--farbe-hintergrund);
+}
+
+h1, h2, h3 {
+    color: var(--farbe-text);
+    margin: 0;
+}
+
+/* 3. Layout: App, Main, Footer */
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: rgba(255, 255, 255, 0.45);
+}
+
+main {
+    flex-grow: 1;
+    padding: 100px 20px 20px; /* Platz für Nav */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+footer {
+    padding: 20px;
+    background-color: var(--farbe-primär);
+    color: var(--farbe-hell);
+    text-align: center;
+}
+
+/* 4. Navigation */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--farbe-primär);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 50px;
+    z-index: 2000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+nav a {
+    color: var(--farbe-hell);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--farbe-akzent);
+}
+
+/* 5. Buttons */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s, opacity 0.3s;
+    background-color: var(--farbe-akzent);
+    color: var(--farbe-hell);
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* 6. Suchfeld */
+.search-input {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 15px 0;
+    border: 1px solid var(--farbe-mint);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-input:focus {
+    border-color: var(--farbe-akzent);
+    box-shadow: 0 0 6px rgba(242,178,180,0.5);
+}
+
+/* 7. Produkt-Grid & Cards */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    background-color: var(--farbe-hell);
+    border: 1px solid var(--farbe-mint);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px var(--farbe-schatten);
+    transition: transform 0.2s;
+}
+
+.product-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+}
+
+/* 8. Product Detail */
+.product-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.product-detail img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* 9. Sticky Warenkorb */
+.sticky-cart {
+    position: fixed;
+    top: 70px; /* unter Nav */
+    right: 20px;
+    z-index: 1500;
+    width: 300px;
+    max-height: 80vh;
+    background-color: var(--farbe-hell);
+    border: 1px solid var(--farbe-mint);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    overflow-y: auto;
+    padding: 15px;
+    display: none; /* initially hidden, wird über React gesteuert */
+}
+
+/* 10. Warenkorb Button */
+.open-cart-button {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1600;
+    background-color: var(--farbe-akzent);
+    color: var(--farbe-hell);
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* 11. Responsive */
+@media (max-width: 768px) {
+    nav {
+        padding: 0 20px;
+    }
+
+    .sticky-cart,
+    .open-cart-button {
+        width: 90%;
+        right: 5%;
+    }
+
+    .product-detail {
+        padding: 0 10px;
+    }
+}

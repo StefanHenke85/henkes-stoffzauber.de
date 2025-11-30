@@ -1,0 +1,229 @@
+/* 🌸 Grundcontainer */
+.home-container {
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 0 20px;
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* 🌈 Soft Pastel Glow Background auf allen Elementen */
+* {
+    scroll-behavior: smooth;
+}
+
+/* 🌸 HERO / INTRO */
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 45px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 35px rgba(255,150,170,0.28);
+    margin-bottom: 70px;
+    gap: 40px;
+    border: 3px dashed #F7C7D3;
+    position: relative;
+}
+
+/* ✨ Subtle floating animation */
+.hero-section:hover {
+    transform: translateY(-3px);
+    transition: 0.3s ease;
+}
+
+/* 🌟 Candy Sparkle Deko */
+.hero-section::after {
+    content: "✨";
+    position: absolute;
+    font-size: 2rem;
+    right: -15px;
+    top: -15px;
+    opacity: 0.7;
+}
+
+/* 🌸 Inhalt */
+.hero-content {
+    flex: 1;
+    text-align: left;
+}
+
+.hero-title {
+    font-size: 2.7rem;
+    color: #5A4747;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+/* 💖 Titel-Herz-Regentropfen */
+.hero-title::after {
+    content: "💖";
+    position: absolute;
+    right: -25px;
+    top: -10px;
+    animation: sparkle 1.4s infinite ease-in-out;
+}
+
+.hero-text {
+    font-size: 1.18rem;
+    color: #4F3C3C;
+    margin-bottom: 35px;
+    line-height: 1.65;
+}
+
+/* 🌸 Buttons */
+.hero-buttons {
+    display: flex;
+    gap: 18px;
+}
+
+.hero-buttons button {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #F2B2B4, #F7C7D3);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+/* 💖 Button Hover Magic */
+.hero-buttons button:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 8px 20px rgba(255,150,170,0.35);
+}
+
+/* 💘 Herz Pop Effekt */
+.hero-buttons button::after {
+    content: "💖";
+    position: absolute;
+    opacity: 0;
+    top: -12px;
+    right: -12px;
+    transition: 0.3s ease;
+    font-size: 1.3rem;
+}
+
+.hero-buttons button:hover::after {
+    opacity: 1;
+    transform: scale(1.3);
+}
+
+/* 🌸 Logo */
+.hero-logo img {
+    width: 340px;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px rgba(255,150,170,0.35);
+    transition: transform 0.3s ease;
+}
+
+/* 💖 Logo schwebt leicht */
+.hero-logo img:hover {
+    transform: rotate(-2deg) scale(1.03);
+}
+
+/* 🌸 CAROUSELS NEBENEINANDER */
+.carousel-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin: 60px 0;
+}
+
+/* 🎀 Carousel Sticker Card */
+.carousel-block {
+    flex: 1;
+    padding: 35px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 3px dashed #F7C7D3;
+    box-shadow: 0 12px 30px rgba(255,150,170,0.25);
+    transition: transform 0.25s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+/* 💖 leichte Hover Bewegung */
+.carousel-block:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(255,150,170,0.35);
+}
+
+/* ✨ Sticker Sparkle */
+.carousel-block::after {
+    content: "🌸";
+    position: absolute;
+    font-size: 1.4rem;
+    bottom: -10px;
+    right: -10px;
+    opacity: 0.8;
+}
+
+/* 💕 Titel */
+.carousel-block h2 {
+    color: #5A4747;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    position: relative;
+}
+
+/* ✨ Glitzer Animation */
+.carousel-block h2::after {
+    content: "✨";
+    margin-left: 10px;
+    font-size: 1.3rem;
+    animation: sparkle 1.5s infinite ease-in-out;
+}
+
+/* 🌸 INFO-BEREICH */
+.home-info {
+    padding: 55px 0;
+    border-top: 3px dashed #F7C7D3;
+}
+
+.home-info h2 {
+    color: #4F3C3C;
+    margin-bottom: 18px;
+    font-size: 1.8rem;
+}
+
+.home-info p {
+    font-size: 1.18rem;
+    color: #4F3C3C;
+    line-height: 1.65;
+}
+
+/* 🌟 Animation */
+@keyframes sparkle {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* 🌸 RESPONSIVE */
+@media (max-width: 900px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-content {
+        text-align: center;
+    }
+
+    .carousel-section {
+        flex-direction: column;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-buttons button {
+        width: 100%;
+    }
+}

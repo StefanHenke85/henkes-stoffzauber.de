@@ -1,0 +1,12 @@
+[
+  {
+    "id": "1764111108701",
+    "name": "test",
+    "description": "test1",
+    "price": 1,
+    "stock": 1,
+    "isFeatured": true,
+    "fabricId": "",
+    "imageUrl": "/uploads/1764111108696-carousel7.jpg"
+  }
+]

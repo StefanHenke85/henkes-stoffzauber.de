@@ -1,0 +1,120 @@
+.checkout-container {
+  max-width: 760px;
+  margin: 40px auto;
+  padding: 28px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 18px;
+  border: 3px dashed #F7C7D3;
+  box-shadow: 0 10px 30px rgba(255,150,170,0.18);
+}
+
+.checkout-container h2 {
+  font-size: 1.9rem;
+  color: #5A4747;
+  margin-bottom: 20px;
+  position: relative;
+  text-align: center;
+}
+
+.checkout-container h2::after {
+  content: "💖";
+  position: absolute;
+  right: -18px;
+  top: -6px;
+  animation: sparkle 1.6s infinite;
+}
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-form label {
+  font-weight: 700;
+  color: #4F3C3C;
+  margin-bottom: 4px;
+}
+
+.checkout-form input,
+.checkout-form select {
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 2px solid #F7C7D3;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: box-shadow 0.18s, transform 0.12s;
+}
+
+.checkout-form input:focus,
+.checkout-form select:focus {
+  outline: none;
+  border-color: #F2B2B4;
+  box-shadow: 0 8px 20px rgba(242,178,180,0.08);
+}
+
+.checkout-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.checkout-buttons button {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg,#F2B2B4,#F7C7D3);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s;
+}
+
+.checkout-buttons button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255,150,170,0.18);
+}
+
+.checkout-download {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  background: linear-gradient(135deg,#EDE7F9,#F2B2B4);
+  color: #5A4747;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+.checkout-total {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 12px;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width:800px){
+  .form-row { flex-direction: column; }
+  .checkout-buttons { flex-direction: column; }
+}
+
+@keyframes sparkle{
+  0%,100%{ opacity:.7; transform:scale(1); }
+  50%{ opacity:1; transform:scale(1.25); }
+}
