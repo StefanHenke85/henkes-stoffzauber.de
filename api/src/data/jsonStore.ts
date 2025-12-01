@@ -127,15 +127,15 @@ export const productsStore = {
   },
 
   getActive(): Product[] {
-    return this.getAll().filter(p => p.isActive !== false);
+    return this.getAll().filter((p: Product) => p.isActive !== false);
   },
 
   getFeatured(): Product[] {
-    return this.getActive().filter(p => p.isFeatured);
+    return this.getActive().filter((p: Product) => p.isFeatured);
   },
 
   getById(id: string): Product | undefined {
-    return this.getAll().find(p => p.id === id);
+    return this.getAll().find((p: Product) => p.id === id);
   },
 
   create(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Product {
@@ -156,7 +156,7 @@ export const productsStore = {
 
   update(id: string, updates: Partial<Product>): Product | null {
     const products = this.getAll();
-    const index = products.findIndex(p => p.id === id);
+    const index = products.findIndex((p: Product) => p.id === id);
     if (index === -1) return null;
 
     products[index] = {
@@ -172,7 +172,7 @@ export const productsStore = {
 
   delete(id: string): Product | null {
     const products = this.getAll();
-    const index = products.findIndex(p => p.id === id);
+    const index = products.findIndex((p: Product) => p.id === id);
     if (index === -1) return null;
 
     const deleted = products.splice(index, 1)[0];
@@ -182,7 +182,7 @@ export const productsStore = {
 
   search(query: string): Product[] {
     const q = query.toLowerCase();
-    return this.getActive().filter(p =>
+    return this.getActive().filter((p: Product) =>
       p.name.toLowerCase().includes(q) ||
       p.description.toLowerCase().includes(q)
     );
@@ -196,11 +196,11 @@ export const ordersStore = {
   },
 
   getById(id: string): Order | undefined {
-    return this.getAll().find(o => o.id === id);
+    return this.getAll().find((o: Order) => o.id === id);
   },
 
   getByOrderNumber(orderNumber: string): Order | undefined {
-    return this.getAll().find(o => o.orderNumber === orderNumber);
+    return this.getAll().find((o: Order) => o.orderNumber === orderNumber);
   },
 
   generateOrderNumber(): string {
@@ -229,7 +229,7 @@ export const ordersStore = {
 
   update(id: string, updates: Partial<Order>): Order | null {
     const orders = this.getAll();
-    const index = orders.findIndex(o => o.id === id);
+    const index = orders.findIndex((o: Order) => o.id === id);
     if (index === -1) return null;
 
     orders[index] = {
@@ -248,14 +248,14 @@ export const ordersStore = {
     let orders = this.getAll();
 
     if (filter?.orderStatus) {
-      orders = orders.filter(o => o.orderStatus === filter.orderStatus);
+      orders = orders.filter((o: Order) => o.orderStatus === filter.orderStatus);
     }
     if (filter?.paymentStatus) {
-      orders = orders.filter(o => o.paymentStatus === filter.paymentStatus);
+      orders = orders.filter((o: Order) => o.paymentStatus === filter.paymentStatus);
     }
 
     // Sort by createdAt descending
-    orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    orders.sort((a: Order, b: Order) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const total = orders.length;
     const start = (page - 1) * limit;
@@ -282,15 +282,15 @@ export const adminsStore = {
   },
 
   getById(id: string): Admin | undefined {
-    return this.getAll().find(a => a.id === id);
+    return this.getAll().find((a: Admin) => a.id === id);
   },
 
   getByUsername(username: string): Admin | undefined {
-    return this.getAll().find(a => a.username.toLowerCase() === username.toLowerCase());
+    return this.getAll().find((a: Admin) => a.username.toLowerCase() === username.toLowerCase());
   },
 
   getByEmail(email: string): Admin | undefined {
-    return this.getAll().find(a => a.email.toLowerCase() === email.toLowerCase());
+    return this.getAll().find((a: Admin) => a.email.toLowerCase() === email.toLowerCase());
   },
 
   create(admin: Omit<Admin, 'id' | 'createdAt' | 'updatedAt'>): Admin {
@@ -309,7 +309,7 @@ export const adminsStore = {
 
   update(id: string, updates: Partial<Admin>): Admin | null {
     const admins = this.getAll();
-    const index = admins.findIndex(a => a.id === id);
+    const index = admins.findIndex((a: Admin) => a.id === id);
     if (index === -1) return null;
 
     admins[index] = {
@@ -335,15 +335,15 @@ export const fabricsStore = {
   },
 
   getActive(): Fabric[] {
-    return this.getAll().filter(f => f.isActive !== false);
+    return this.getAll().filter((f: Fabric) => f.isActive !== false);
   },
 
   getFeatured(): Fabric[] {
-    return this.getActive().filter(f => f.isFeatured);
+    return this.getActive().filter((f: Fabric) => f.isFeatured);
   },
 
   getById(id: string): Fabric | undefined {
-    return this.getAll().find(f => f.id === id);
+    return this.getAll().find((f: Fabric) => f.id === id);
   },
 
   create(fabric: Omit<Fabric, 'id' | 'createdAt' | 'updatedAt'>): Fabric {
@@ -364,7 +364,7 @@ export const fabricsStore = {
 
   update(id: string, updates: Partial<Fabric>): Fabric | null {
     const fabrics = this.getAll();
-    const index = fabrics.findIndex(f => f.id === id);
+    const index = fabrics.findIndex((f: Fabric) => f.id === id);
     if (index === -1) return null;
 
     fabrics[index] = {
@@ -380,7 +380,7 @@ export const fabricsStore = {
 
   delete(id: string): Fabric | null {
     const fabrics = this.getAll();
-    const index = fabrics.findIndex(f => f.id === id);
+    const index = fabrics.findIndex((f: Fabric) => f.id === id);
     if (index === -1) return null;
 
     const deleted = fabrics.splice(index, 1)[0];
@@ -390,7 +390,7 @@ export const fabricsStore = {
 
   search(query: string): Fabric[] {
     const q = query.toLowerCase();
-    return this.getActive().filter(f =>
+    return this.getActive().filter((f: Fabric) =>
       f.name.toLowerCase().includes(q) ||
       f.description.toLowerCase().includes(q) ||
       f.fabricType.toLowerCase().includes(q)
