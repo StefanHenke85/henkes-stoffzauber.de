@@ -293,6 +293,18 @@ export function AdminDashboard() {
     }
   };
 
+  const handleDeleteOrder = async (order: Order) => {
+    if (!confirm(`Bestellung ${order.orderNumber} wirklich löschen?`)) return;
+
+    try {
+      await ordersApi.delete(order.id);
+      toast.success('Bestellung gelöscht');
+      loadOrders();
+    } catch (error) {
+      toast.error('Fehler beim Löschen');
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -692,6 +704,17 @@ export function AdminDashboard() {
                             </li>
                           ))}
                         </ul>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteOrder(order)}
+                          className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Bestellung löschen
+                        </button>
                       </div>
                     </div>
                   ))}

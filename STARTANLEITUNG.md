@@ -139,11 +139,11 @@ npm --version
 ### 3. Dependencies installieren und builden
 
 ```bash
-cd /var/www/henkes-stoffzauber
+cd /var/www/henkes-stoffzauber.de
 
 # API builden
 cd api
-npm install --production
+npm install
 npm run build
 
 # Web builden
@@ -155,7 +155,7 @@ npm run build
 ### 4. Umgebungsvariablen für Produktion
 
 ```bash
-cd /var/www/henkes-stoffzauber/api
+cd /var/www/henkes-stoffzauber.de/api
 nano .env
 ```
 
@@ -179,7 +179,7 @@ PAYPAL_CLIENT_SECRET=dein-live-secret
 sudo npm install -g pm2
 
 # API mit PM2 starten
-cd /var/www/henkes-stoffzauber/api
+cd /var/www/henkes-stoffzauber.de/api
 pm2 start dist/index.js --name "henkes-api"
 
 # Status prüfen
@@ -209,9 +209,31 @@ sudo nano /etc/nginx/sites-available/henkes-stoffzauber.de
 
 **Nginx-Konfiguration:**
 ```nginx
+# HTTP → HTTPS Redirect
 server {
     listen 80;
     server_name henkes-stoffzauber.de www.henkes-stoffzauber.de;
+
+    # Redirect all HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl http2;
+    server_name henkes-stoffzauber.de www.henkes-stoffzauber.de;
+
+    # SSL Certificate (Let's Encrypt)
+    ssl_certificate /etc/letsencrypt/live/henkes-stoffzauber.de/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/henkes-stoffzauber.de/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/henkes-stoffzauber.de/chain.pem;
+
+    # SSL Configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
 
     # API Requests
     location /api {
@@ -228,14 +250,14 @@ server {
 
     # Bilder aus API-Upload-Ordner
     location /uploads/ {
-        alias /var/www/henkes-stoffzauber/api/uploads/;
+        alias /var/www/henkes-stoffzauber.de/api/uploads/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
 
     # Rechnungen (nur für interne Nutzung)
     location /invoices/ {
-        alias /var/www/henkes-stoffzauber/api/invoices/;
+        alias /var/www/henkes-stoffzauber.de/api/invoices/;
         internal;
     }
 
@@ -247,7 +269,7 @@ server {
 
     # Frontend (React SPA)
     location / {
-        root /var/www/henkes-stoffzauber/web/dist;
+        root /var/www/henkes-stoffzauber.de/web/dist;
         index index.html;
         try_files $uri $uri/ /index.html;
 
@@ -398,12 +420,12 @@ cd web && npm run dev
 ### Produktion (Server)
 ```bash
 # Nach Code-Updates:
-cd /var/www/henkes-stoffzauber
+cd /var/www/henkes-stoffzauber.de
 
 # Backend neu builden und starten
 cd api
 git pull                    # Falls Git verwendet wird
-npm install --production
+npm install
 npm run build
 pm2 restart henkes-api
 

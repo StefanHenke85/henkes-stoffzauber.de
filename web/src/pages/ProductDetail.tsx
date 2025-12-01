@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ShoppingCart, ArrowLeft, Check, X, ZoomIn } from 'lucide-react';
-import { productsApi } from '@/utils/api';
+import { productsApi, fabricsApi } from '@/utils/api';
 import { useCart } from '@/contexts/CartContext';
 import { formatCurrency, getImageUrl, cn } from '@/utils/helpers';
-import type { Product } from '@/types';
+import type { Product, Fabric } from '@/types';
 
 export function ProductDetail() {
   const { productId } = useParams<{ productId: string }>();
@@ -14,6 +14,8 @@ export function ProductDetail() {
   const [error, setError] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [allFabrics, setAllFabrics] = useState<Fabric[]>([]);
+  const [selectedFabricIds, setSelectedFabricIds] = useState<string[]>([]);
 
   const { addItem, isInCart, getItemQuantity } = useCart();
 
@@ -37,6 +39,19 @@ export function ProductDetail() {
 
     loadProduct();
   }, [productId]);
+
+  useEffect(() => {
+    const loadFabrics = async () => {
+      try {
+        const data = await fabricsApi.getAll();
+        setAllFabrics(data);
+      } catch (err) {
+        console.error('Error loading fabrics:', err);
+      }
+    };
+
+    loadFabrics();
+  }, []);
 
   if (loading) {
     return (
@@ -67,6 +82,30 @@ export function ProductDetail() {
   const imageUrl = imageError
     ? 'https://placehold.co/600x600/F2B2B4/ffffff?text=Stoffzauber'
     : getImageUrl(product.imageUrl, product.imageUrlWebp);
+
+  // Get available fabrics for this product
+  const availableFabrics = product.availableFabrics && product.availableFabrics.length > 0
+    ? allFabrics.filter(f => product.availableFabrics!.includes(f.id))
+    : [];
+
+  const toggleFabric = (fabricId: string) => {
+    setSelectedFabricIds(prev =>
+      prev.includes(fabricId)
+        ? prev.filter(id => id !== fabricId)
+        : [...prev, fabricId]
+    );
+  };
+
+  const handleAddToCart = () => {
+    const selectedFabrics = selectedFabricIds
+      .map(id => {
+        const fabric = allFabrics.find(f => f.id === id);
+        return fabric ? { fabricId: fabric.id, fabricName: fabric.name } : null;
+      })
+      .filter((f): f is { fabricId: string; fabricName: string } => f !== null);
+
+    addItem(product, 1, selectedFabrics.length > 0 ? selectedFabrics : undefined);
+  };
 
   return (
     <>
@@ -172,9 +211,41 @@ export function ProductDetail() {
                 </div>
               )}
 
+              {availableFabrics.length > 0 && (
+                <div className="mb-6 bg-secondary-50 rounded-xl p-4">
+                  <h2 className="font-semibold text-neutral-800 mb-3">
+                    Stoffauswahl:
+                  </h2>
+                  <p className="text-sm text-neutral-600 mb-3">
+                    Wählen Sie die Stoffe aus, aus denen dieses Produkt gefertigt werden soll:
+                  </p>
+                  <div className="space-y-2">
+                    {availableFabrics.map(fabric => (
+                      <label
+                        key={fabric.id}
+                        className="flex items-start gap-3 cursor-pointer hover:bg-secondary-100 p-2 rounded-lg transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedFabricIds.includes(fabric.id)}
+                          onChange={() => toggleFabric(fabric.id)}
+                          className="mt-1 h-5 w-5 text-primary-500 rounded border-gray-300 focus:ring-primary-400"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-neutral-800">{fabric.name}</div>
+                          {fabric.description && (
+                            <div className="text-sm text-neutral-600">{fabric.description}</div>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="mt-auto space-y-4">
                 <button
-                  onClick={() => addItem(product)}
+                  onClick={handleAddToCart}
                   disabled={!isAvailable}
                   className={cn(
                     'w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all',

@@ -82,6 +82,12 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       {formatCurrency(item.price)}
                     </p>
 
+                    {item.selectedFabrics && item.selectedFabrics.length > 0 && (
+                      <p className="text-xs text-neutral-600 mt-1">
+                        Stoffe: {item.selectedFabrics.map(f => f.fabricName).join(', ')}
+                      </p>
+                    )}
+
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={() => decreaseQuantity(item.id)}

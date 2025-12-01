@@ -99,6 +99,10 @@ export const ordersApi = {
     const { data } = await api.patch<ApiResponse<Order>>(`/orders/admin/${id}`, updates);
     return data.data!;
   },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/orders/admin/${id}`);
+  },
 };
 
 // Auth API

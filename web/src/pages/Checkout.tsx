@@ -12,7 +12,8 @@ export function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart, addItem, decreaseQuantity, removeItem } = useCart();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'invoice' | 'prepayment'>('paypal');
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup'>('paypal');
+  const [customerNotes, setCustomerNotes] = useState('');
 
   const [address, setAddress] = useState<Customer>({
     firstName: '',
@@ -82,6 +83,7 @@ export function Checkout() {
         cart: items,
         address,
         paymentMethod,
+        customerNotes: customerNotes.trim() || undefined,
       });
 
       if (response.approvalUrl) {
@@ -301,6 +303,24 @@ export function Checkout() {
                   </div>
                 </div>
 
+                {/* Customer Notes */}
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold text-neutral-800 mb-4">
+                    Anmerkungen
+                  </h2>
+                  <textarea
+                    value={customerNotes}
+                    onChange={(e) => setCustomerNotes(e.target.value)}
+                    placeholder="Haben Sie besondere Wünsche oder Anmerkungen zu Ihrer Bestellung?"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 transition-all resize-none"
+                    rows={4}
+                    maxLength={500}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {customerNotes.length}/500 Zeichen
+                  </p>
+                </div>
+
                 {/* Payment Method */}
                 <div className="bg-white rounded-xl p-6 shadow-sm">
                   <h2 className="text-xl font-semibold text-neutral-800 mb-4 flex items-center gap-2">
@@ -311,6 +331,7 @@ export function Checkout() {
                   <div className="space-y-3">
                     {[
                       { value: 'paypal', label: 'PayPal', desc: 'Sichere Zahlung über PayPal' },
+                      { value: 'cash_on_pickup', label: 'Barzahlung bei Abholung', desc: 'Bar bezahlen bei Abholung in Rheinberg' },
                       { value: 'invoice', label: 'Rechnung', desc: 'Zahlung innerhalb von 14 Tagen' },
                       { value: 'prepayment', label: 'Vorkasse', desc: 'Überweisung vor Versand' },
                     ].map((method) => (
@@ -381,6 +402,11 @@ export function Checkout() {
                         <p className="text-sm text-neutral-500 mb-2">
                           {formatCurrency(item.price)} pro Stück
                         </p>
+                        {item.selectedFabrics && item.selectedFabrics.length > 0 && (
+                          <p className="text-xs text-neutral-600 mb-2">
+                            Stoffe: {item.selectedFabrics.map(f => f.fabricName).join(', ')}
+                          </p>
+                        )}
                         <div className="flex items-center gap-2">
                           <button
                             type="button"

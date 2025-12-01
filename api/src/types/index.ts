@@ -10,7 +10,8 @@ export interface IProduct {
   imageUrl: string;
   imageUrlWebp?: string;
   thumbnailUrl?: string;
-  fabrics?: string;
+  fabrics?: string; // Comma-separated fabric IDs for backward compatibility
+  availableFabrics?: string[]; // Array of fabric IDs that can be selected for this product
   isFeatured: boolean;
   isActive: boolean;
   createdAt?: Date;
@@ -37,6 +38,7 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   imageUrl?: string;
+  selectedFabrics?: Array<{ fabricId: string; fabricName: string }>; // Selected fabrics for this order item
 }
 
 export interface IOrder {
@@ -47,13 +49,14 @@ export interface IOrder {
   subtotal: number;
   shipping: number;
   total: number;
-  paymentMethod: 'paypal' | 'invoice' | 'prepayment';
+  paymentMethod: 'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   orderStatus: 'new' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paypalOrderId?: string;
   invoicePath?: string;
   trackingNumber?: string;
-  notes?: string;
+  notes?: string; // Admin notes
+  customerNotes?: string; // Customer remarks/wishes
   createdAt?: Date;
   updatedAt?: Date;
 }

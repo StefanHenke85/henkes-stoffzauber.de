@@ -1,10 +1,12 @@
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
+import QRCode from 'qrcode';
 import { IOrder } from '../types';
 import { logger } from '../utils/logger';
 
 const invoicesDir = path.resolve('./invoices');
+const logoPath = path.resolve('./uploads/logo.jpg');
 
 // Ensure invoices directory exists
 if (!fs.existsSync(invoicesDir)) {
@@ -12,10 +14,38 @@ if (!fs.existsSync(invoicesDir)) {
 }
 
 /**
+ * Generate EPC QR Code for SEPA payment
+ */
+async function generatePaymentQR(
+  iban: string,
+  bic: string,
+  recipient: string,
+  amount: number,
+  reference: string
+): Promise<Buffer> {
+  // EPC QR Code format (SEPA)
+  const epcData = [
+    'BCD',                    // Service Tag
+    '002',                    // Version
+    '1',                      // Character Set (UTF-8)
+    'SCT',                    // Identification
+    bic,                      // BIC
+    recipient,                // Beneficiary Name
+    iban,                     // Beneficiary Account
+    `EUR${amount.toFixed(2)}`, // Amount
+    '',                       // Purpose
+    reference,                // Reference
+    '',                       // Beneficiary to Originator Information
+  ].join('\n');
+
+  return await QRCode.toBuffer(epcData, { errorCorrectionLevel: 'M', width: 150 });
+}
+
+/**
  * Generate PDF invoice for order
  */
 export async function generateInvoice(order: IOrder): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const invoicePath = path.join(invoicesDir, `invoice-${order.orderNumber}.pdf`);
 
     try {
@@ -31,19 +61,24 @@ export async function generateInvoice(order: IOrder): Promise<string> {
       const stream = fs.createWriteStream(invoicePath);
       doc.pipe(stream);
 
+      // Logo (if exists)
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 50, 40, { width: 80 });
+      }
+
       // Header
       doc
         .fontSize(24)
         .fillColor('#5A4747')
-        .text("Henkes Stoffzauber", 50, 50);
+        .text("Henkes Stoffzauber", 140, 50);
 
       doc
         .fontSize(10)
         .fillColor('#666')
-        .text('Musterstraße 1', 50, 80)
-        .text('12345 Musterstadt', 50, 95)
-        .text('info@henkes-stoffzauber.de', 50, 110)
-        .text('www.henkes-stoffzauber.de', 50, 125);
+        .text('Rheinstraße 40', 140, 80)
+        .text('47495 Rheinberg', 140, 95)
+        .text('Telefon: 015565 612722', 140, 110)
+        .text('www.henkes-stoffzauber.de', 140, 125);
 
       // Invoice title
       doc
@@ -169,18 +204,41 @@ export async function generateInvoice(order: IOrder): Promise<string> {
 
       if (order.paymentMethod === 'paypal') {
         doc.text('Zahlung erfolgt via PayPal.', 50, yPosition);
-      } else if (order.paymentMethod === 'invoice') {
+      } else if (order.paymentMethod === 'cash_on_pickup') {
         doc
-          .text('Bitte überweisen Sie den Betrag innerhalb von 14 Tagen auf folgendes Konto:', 50, yPosition)
-          .text('IBAN: DE12 3456 7890 1234 5678 90', 50, yPosition + 15)
-          .text('BIC: TESTBIC', 50, yPosition + 30)
-          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 45);
-      } else {
+          .text('Barzahlung bei Abholung:', 50, yPosition)
+          .text('Henkes Stoffzauber, Rheinstraße 40, 47495 Rheinberg', 50, yPosition + 15)
+          .text('Telefon: 015565 612722', 50, yPosition + 30);
+      } else if (order.paymentMethod === 'invoice' || order.paymentMethod === 'prepayment') {
+        const paymentText = order.paymentMethod === 'invoice'
+          ? 'Bitte überweisen Sie den Betrag innerhalb von 14 Tagen auf folgendes Konto:'
+          : 'Bitte überweisen Sie den Betrag vor Versand auf folgendes Konto:';
+
         doc
-          .text('Bitte überweisen Sie den Betrag vor Versand auf folgendes Konto:', 50, yPosition)
-          .text('IBAN: DE12 3456 7890 1234 5678 90', 50, yPosition + 15)
-          .text('BIC: TESTBIC', 50, yPosition + 30)
-          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 45);
+          .text(paymentText, 50, yPosition)
+          .text('Kontoinhaber: Henkes Stoffzauber', 50, yPosition + 15)
+          .text('Bank: Sparkasse am Niederrhein', 50, yPosition + 30)
+          .text('IBAN: DE21 3545 0000 1201 2022 96', 50, yPosition + 45)
+          .text('BIC: WELADED1MOR', 50, yPosition + 60)
+          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 75);
+
+        // Add QR Code for payment
+        try {
+          const qrBuffer = await generatePaymentQR(
+            'DE21354500001201202296',
+            'WELADED1MOR',
+            'Henkes Stoffzauber',
+            order.total,
+            order.orderNumber
+          );
+          doc.image(qrBuffer, 350, yPosition, { width: 150 });
+          doc
+            .fontSize(8)
+            .fillColor('#888')
+            .text('QR-Code zum Bezahlen scannen', 350, yPosition + 155, { width: 150, align: 'center' });
+        } catch (qrError) {
+          logger.error('QR Code generation error:', qrError);
+        }
       }
 
       // Footer

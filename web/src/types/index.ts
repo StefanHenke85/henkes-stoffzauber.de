@@ -1,3 +1,16 @@
+// Fabric types
+export interface Fabric {
+  id: string;
+  _id?: string;
+  name: string;
+  description: string;
+  imageUrl?: string;
+  isFeatured: boolean;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Product types
 export interface Product {
   id: string;
@@ -10,6 +23,7 @@ export interface Product {
   imageUrlWebp?: string;
   thumbnailUrl?: string;
   fabrics?: string;
+  availableFabrics?: string[]; // Array of fabric IDs
   isFeatured: boolean;
   isActive: boolean;
   createdAt?: string;
@@ -19,6 +33,7 @@ export interface Product {
 // Cart types
 export interface CartItem extends Product {
   quantity: number;
+  selectedFabrics?: Array<{ fabricId: string; fabricName: string }>; // Selected fabrics
 }
 
 // Customer types
@@ -41,6 +56,7 @@ export interface OrderItem {
   price: number;
   quantity: number;
   imageUrl?: string;
+  selectedFabrics?: Array<{ fabricId: string; fabricName: string }>;
 }
 
 export interface Order {

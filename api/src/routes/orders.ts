@@ -28,7 +28,7 @@ router.post(
   checkoutRateLimiter,
   async (req: Request, res: Response<ApiResponse>) => {
     try {
-      const { cart, address, paymentMethod } = req.body;
+      const { cart, address, paymentMethod, customerNotes } = req.body;
 
       if (!cart || !Array.isArray(cart) || cart.length === 0) {
         res.status(400).json({
@@ -97,6 +97,7 @@ router.post(
         paymentMethod: paymentMethod || 'paypal',
         paymentStatus: 'pending',
         orderStatus: 'new',
+        customerNotes: customerNotes || undefined,
       });
 
       // Update stock
@@ -390,6 +391,45 @@ router.patch(
       res.status(500).json({
         success: false,
         error: 'Fehler beim Aktualisieren der Bestellung',
+      });
+    }
+  }
+);
+
+/**
+ * DELETE /api/orders/admin/:id
+ * Delete order (admin only)
+ */
+router.delete(
+  '/admin/:id',
+  authenticateToken,
+  requireAdmin,
+  async (req: AuthRequest, res: Response<ApiResponse>) => {
+    try {
+      const order = ordersStore.getById(req.params.id);
+
+      if (!order) {
+        res.status(404).json({
+          success: false,
+          error: 'Bestellung nicht gefunden',
+        });
+        return;
+      }
+
+      // Delete order
+      ordersStore.delete(req.params.id);
+
+      logger.info(`Order ${order.orderNumber} deleted by ${req.user?.username}`);
+
+      res.json({
+        success: true,
+        message: 'Bestellung gelöscht',
+      });
+    } catch (error) {
+      logger.error('Delete order error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Fehler beim Löschen der Bestellung',
       });
     }
   }

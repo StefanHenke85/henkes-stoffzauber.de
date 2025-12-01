@@ -5,7 +5,7 @@ interface CartContextType {
   items: CartItem[];
   itemCount: number;
   total: number;
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: Product, quantity?: number, selectedFabrics?: Array<{ fabricId: string; fabricName: string }>) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   decreaseQuantity: (productId: string) => void;
@@ -40,7 +40,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1, selectedFabrics?: Array<{ fabricId: string; fabricName: string }>) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.id === product.id);
 
@@ -49,6 +49,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updated[existingIndex] = {
           ...updated[existingIndex],
           quantity: updated[existingIndex].quantity + quantity,
+          selectedFabrics: selectedFabrics || updated[existingIndex].selectedFabrics,
         };
         return updated;
       }
@@ -59,6 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           ...product,
           id: product.id || product._id || '',
           quantity,
+          selectedFabrics,
         },
       ];
     });

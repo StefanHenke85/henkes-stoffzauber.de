@@ -76,13 +76,19 @@ export async function sendOrderConfirmation(order: IOrder, invoicePath?: string)
             <h3>Bestellnummer: ${order.orderNumber}</h3>
             <p><strong>Artikel:</strong></p>
             <ul>
-              ${order.items.map((item) => `<li>${item.name} x ${item.quantity} - ${item.price.toFixed(2)} EUR</li>`).join('')}
+              ${order.items.map((item) => `<li>${item.name} x ${item.quantity} - ${item.price.toFixed(2)} EUR${
+                item.selectedFabrics && item.selectedFabrics.length > 0
+                  ? `<br><small style="color: #666;">Stoffe: ${item.selectedFabrics.map(f => f.fabricName).join(', ')}</small>`
+                  : ''
+              }</li>`).join('')}
             </ul>
             <p class="total">Gesamtsumme: ${order.total.toFixed(2)} EUR</p>
             <p><strong>Zahlungsart:</strong> ${
               order.paymentMethod === 'paypal' ? 'PayPal' :
-              order.paymentMethod === 'invoice' ? 'Rechnung' : 'Vorkasse'
+              order.paymentMethod === 'invoice' ? 'Rechnung' :
+              order.paymentMethod === 'cash_on_pickup' ? 'Barzahlung bei Abholung' : 'Vorkasse'
             }</p>
+            ${order.customerNotes ? `<p><strong>Ihre Anmerkungen:</strong><br>${order.customerNotes}</p>` : ''}
           </div>
 
           <div class="order-details">
@@ -95,15 +101,30 @@ export async function sendOrderConfirmation(order: IOrder, invoicePath?: string)
             </p>
           </div>
 
-          ${order.paymentMethod === 'prepayment' ? `
+          ${order.paymentMethod === 'cash_on_pickup' ? `
           <div class="order-details">
-            <h3>Bankverbindung für Vorkasse:</h3>
+            <h3>Abholadresse:</h3>
+            <p>
+              Henkes Stoffzauber<br>
+              Rheinstraße 40<br>
+              47495 Rheinberg<br>
+              Telefon: 015565 612722
+            </p>
+            <p>Bitte bringen Sie den Betrag in bar zur Abholung mit.</p>
+          </div>
+          ` : ''}
+
+          ${order.paymentMethod === 'prepayment' || order.paymentMethod === 'invoice' ? `
+          <div class="order-details">
+            <h3>Bankverbindung:</h3>
             <p>
               <strong>Kontoinhaber:</strong> Henkes Stoffzauber<br>
-              <strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br>
-              <strong>BIC:</strong> TESTBIC<br>
+              <strong>Bank:</strong> Sparkasse am Niederrhein<br>
+              <strong>IBAN:</strong> DE21 3545 0000 1201 2022 96<br>
+              <strong>BIC:</strong> WELADED1MOR<br>
               <strong>Verwendungszweck:</strong> ${order.orderNumber}
             </p>
+            ${order.paymentMethod === 'invoice' ? '<p>Zahlbar innerhalb von 14 Tagen nach Erhalt der Ware.</p>' : '<p>Bitte überweisen Sie den Betrag vor dem Versand.</p>'}
           </div>
           ` : ''}
 
@@ -169,12 +190,21 @@ export async function sendOrderNotification(order: IOrder, invoicePath?: string)
 
     <h3>Bestellte Artikel:</h3>
     <ul>
-      ${order.items.map((item) => `<li>${item.name} x ${item.quantity} - ${item.price.toFixed(2)} EUR</li>`).join('')}
+      ${order.items.map((item) => `<li>${item.name} x ${item.quantity} - ${item.price.toFixed(2)} EUR${
+        item.selectedFabrics && item.selectedFabrics.length > 0
+          ? `<br><small style="color: #666;">Stoffe: ${item.selectedFabrics.map(f => f.fabricName).join(', ')}</small>`
+          : ''
+      }</li>`).join('')}
     </ul>
 
     <p><strong>Gesamtsumme:</strong> ${order.total.toFixed(2)} EUR</p>
-    <p><strong>Zahlungsart:</strong> ${order.paymentMethod}</p>
+    <p><strong>Zahlungsart:</strong> ${
+      order.paymentMethod === 'paypal' ? 'PayPal' :
+      order.paymentMethod === 'invoice' ? 'Rechnung' :
+      order.paymentMethod === 'cash_on_pickup' ? 'Barzahlung bei Abholung' : 'Vorkasse'
+    }</p>
     <p><strong>Zahlungsstatus:</strong> ${order.paymentStatus}</p>
+    ${order.customerNotes ? `<p><strong>Kundenanmerkungen:</strong><br>${order.customerNotes}</p>` : ''}
   `;
 
   const attachments = invoicePath

@@ -6,7 +6,12 @@
       "Bash(test:*)",
       "Bash(dir \"c:\\Users\\Stefan\\Desktop\\henkes-stoffzauber\\api\\uploads\")",
       "Bash(timeout 5 bash:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(findstr:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
