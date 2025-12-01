@@ -170,14 +170,14 @@ export function Layout({ children }: LayoutProps) {
                   </Link>
                 </li>
                 <li>
-                  <a href="/impressum" className="text-white/80 hover:text-white transition-colors">
+                  <Link to="/impressum" className="text-white/80 hover:text-white transition-colors">
                     Impressum
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/datenschutz" className="text-white/80 hover:text-white transition-colors">
+                  <Link to="/datenschutz" className="text-white/80 hover:text-white transition-colors">
                     Datenschutz
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

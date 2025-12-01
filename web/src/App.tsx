@@ -16,6 +16,8 @@ import { Checkout } from '@/pages/Checkout';
 import { CheckoutSuccess } from '@/pages/CheckoutSuccess';
 import { CheckoutCancel } from '@/pages/CheckoutCancel';
 import { Admin } from '@/pages/Admin';
+import { Impressum } from '@/pages/Impressum';
+import { Datenschutz } from '@/pages/Datenschutz';
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/checkout/cancel" element={<CheckoutCancel />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/datenschutz" element={<Datenschutz />} />
                 <Route
                   path="*"
                   element={
