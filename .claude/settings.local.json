@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(test:*)",
+      "Bash(dir \"c:\\Users\\Stefan\\Desktop\\henkes-stoffzauber\\api\\uploads\")",
+      "Bash(timeout 5 bash:*)",
+      "Bash(dir:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

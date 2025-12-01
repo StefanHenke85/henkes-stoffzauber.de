@@ -2,16 +2,16 @@
 
 ## Voraussetzungen
 
-### Lokale Entwicklung (Windows/WSL)
+### Lokale Entwicklung (Windows)
 - **Node.js 18+** (empfohlen: Node.js 20)
 - **npm** (kommt mit Node.js)
 
-### Produktion (Server)
-- **Linux Server** (Ubuntu/Debian empfohlen)
+### Produktion (euserv VServer)
+- **Ubuntu Server** (euserv VPS)
 - **Node.js 18+**
 - **Nginx** als Reverse Proxy
-- **PM2** oder **systemd** für Prozess-Management
-- Optional: **Let's Encrypt** für SSL
+- **PM2** für Prozess-Management
+- **Let's Encrypt** für SSL (certbot)
 
 ---
 
@@ -49,7 +49,7 @@ henkes-stoffzauber.de/
 
 ```bash
 # Im Projektverzeichnis
-cd C:\Users\BreunigChristopher\henkes-stoffzauber.de
+cd henkes-stoffzauber
 
 # API Dependencies
 cd api
@@ -83,14 +83,14 @@ FRONTEND_URL=http://localhost:5173
 
 **Terminal 1 - Backend (API):**
 ```bash
-cd C:\Users\BreunigChristopher\henkes-stoffzauber.de\api
+cd api
 npm run dev
 ```
 → Läuft auf **http://localhost:3001**
 
 **Terminal 2 - Frontend (Web):**
 ```bash
-cd C:\Users\BreunigChristopher\henkes-stoffzauber.de\web
+cd web
 npm run dev
 ```
 → Läuft auf **http://localhost:5173**
@@ -107,68 +107,113 @@ npm run dev
 
 ---
 
-## PRODUKTION (Server Deployment)
+## PRODUKTION (euserv VServer Deployment)
 
-### Option A: Direkt mit Node.js + PM2
+### 1. Projekt auf Server kopieren
 
-#### 1. Projekt auf Server kopieren
+**Von Windows aus:**
 ```bash
-scp -r henkes-stoffzauber.de user@server:/var/www/
+scp -r henkes-stoffzauber root@deine-server-ip:/var/www/
 ```
 
-#### 2. Dependencies installieren
+**Oder mit Git (empfohlen):**
 ```bash
-cd /var/www/henkes-stoffzauber.de
+# Auf dem Server
+cd /var/www
+git clone https://github.com/dein-repo/henkes-stoffzauber.git
+cd henkes-stoffzauber
+```
 
-# API
+### 2. Node.js installieren (falls noch nicht vorhanden)
+
+```bash
+# Node.js 20 LTS installieren
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Version prüfen
+node --version
+npm --version
+```
+
+### 3. Dependencies installieren und builden
+
+```bash
+cd /var/www/henkes-stoffzauber
+
+# API builden
 cd api
 npm install --production
 npm run build
 
-# Web
+# Web builden
 cd ../web
 npm install
 npm run build
 ```
 
-#### 3. Umgebungsvariablen für Produktion
+### 4. Umgebungsvariablen für Produktion
+
 ```bash
-cd /var/www/henkes-stoffzauber.de/api
+cd /var/www/henkes-stoffzauber/api
 nano .env
 ```
 
 **Wichtige Änderungen für Produktion:**
 ```env
 NODE_ENV=production
+PORT=3001
 FRONTEND_URL=https://henkes-stoffzauber.de
 ALLOWED_ORIGINS=https://henkes-stoffzauber.de,https://www.henkes-stoffzauber.de
+
+# PayPal auf LIVE umstellen (wenn bereit)
+PAYPAL_ENV=live
+PAYPAL_CLIENT_ID=deine-live-client-id
+PAYPAL_CLIENT_SECRET=dein-live-secret
 ```
 
-#### 4. PM2 installieren und starten
+### 5. PM2 installieren und API starten
+
 ```bash
 # PM2 global installieren
-npm install -g pm2
+sudo npm install -g pm2
 
 # API mit PM2 starten
-cd /var/www/henkes-stoffzauber.de/api
+cd /var/www/henkes-stoffzauber/api
 pm2 start dist/index.js --name "henkes-api"
+
+# Status prüfen
+pm2 status
+pm2 logs henkes-api
 
 # PM2 beim Systemstart aktivieren
 pm2 startup
 pm2 save
 ```
 
-#### 5. Nginx konfigurieren
+**Wichtige PM2-Befehle:**
+```bash
+pm2 list                    # Alle Apps anzeigen
+pm2 logs henkes-api        # Logs anzeigen
+pm2 restart henkes-api     # Neu starten
+pm2 stop henkes-api        # Stoppen
+pm2 delete henkes-api      # Löschen
+pm2 monit                  # Monitoring
+```
+
+### 6. Nginx konfigurieren
+
 ```bash
 sudo nano /etc/nginx/sites-available/henkes-stoffzauber.de
 ```
 
+**Nginx-Konfiguration:**
 ```nginx
 server {
     listen 80;
     server_name henkes-stoffzauber.de www.henkes-stoffzauber.de;
 
-    # API Proxy
+    # API Requests
     location /api {
         proxy_pass http://localhost:3001;
         proxy_http_version 1.1;
@@ -178,40 +223,77 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
     }
 
-    # Uploads
-    location /uploads {
-        alias /var/www/henkes-stoffzauber.de/api/uploads;
-        expires 7d;
+    # Bilder aus API-Upload-Ordner
+    location /uploads/ {
+        alias /var/www/henkes-stoffzauber/api/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Rechnungen (nur für interne Nutzung)
+    location /invoices/ {
+        alias /var/www/henkes-stoffzauber/api/invoices/;
+        internal;
     }
 
     # Health Check
     location /health {
         proxy_pass http://localhost:3001;
+        access_log off;
     }
 
-    # Frontend (statische Dateien)
+    # Frontend (React SPA)
     location / {
-        root /var/www/henkes-stoffzauber.de/web/dist;
+        root /var/www/henkes-stoffzauber/web/dist;
+        index index.html;
         try_files $uri $uri/ /index.html;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+
+        # Cache für statische Assets
+        location ~* \.(jpg|jpeg|png|gif|ico|css|js|webp)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
     }
 }
 ```
 
+**Nginx aktivieren:**
 ```bash
-# Aktivieren
+# Symlink erstellen
 sudo ln -s /etc/nginx/sites-available/henkes-stoffzauber.de /etc/nginx/sites-enabled/
+
+# Konfiguration testen
 sudo nginx -t
+
+# Nginx neuladen
 sudo systemctl reload nginx
 ```
 
-#### 6. SSL mit Let's Encrypt
+### 7. SSL mit Let's Encrypt
+
 ```bash
+# Certbot installieren
+sudo apt update
 sudo apt install certbot python3-certbot-nginx
+
+# SSL-Zertifikat erstellen (automatische Nginx-Konfiguration)
 sudo certbot --nginx -d henkes-stoffzauber.de -d www.henkes-stoffzauber.de
+
+# Auto-Renewal testen
+sudo certbot renew --dry-run
+```
+
+### 8. Firewall konfigurieren (UFW)
+
+```bash
+# Firewall einrichten
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+sudo ufw status
 ```
 
 ---
@@ -304,13 +386,34 @@ cat api/.env | grep ADMIN_PASSWORD
 
 ## Schnellstart-Befehle
 
+### Lokale Entwicklung
 ```bash
-# Alles starten (2 Terminals)
-# Terminal 1:
-cd C:\Users\BreunigChristopher\henkes-stoffzauber.de\api && npm run dev
+# Terminal 1 (API):
+cd api && npm run dev
 
-# Terminal 2:
-cd C:\Users\BreunigChristopher\henkes-stoffzauber.de\web && npm run dev
+# Terminal 2 (Frontend):
+cd web && npm run dev
+```
+
+### Produktion (Server)
+```bash
+# Nach Code-Updates:
+cd /var/www/henkes-stoffzauber
+
+# Backend neu builden und starten
+cd api
+git pull                    # Falls Git verwendet wird
+npm install --production
+npm run build
+pm2 restart henkes-api
+
+# Frontend neu builden
+cd ../web
+npm install
+npm run build
+
+# Nginx neuladen
+sudo systemctl reload nginx
 ```
 
 **URLs:**
