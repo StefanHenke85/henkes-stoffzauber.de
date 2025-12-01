@@ -53,6 +53,7 @@ export function AdminDashboard() {
     price: '',
     stock: '',
     fabrics: '',
+    availableFabrics: [] as string[],
     isFeatured: false,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -131,6 +132,7 @@ export function AdminDashboard() {
       price: '',
       stock: '',
       fabrics: '',
+      availableFabrics: [],
       isFeatured: false,
     });
     setImageFile(null);
@@ -146,6 +148,7 @@ export function AdminDashboard() {
       price: String(product.price),
       stock: String(product.stock),
       fabrics: product.fabrics || '',
+      availableFabrics: product.availableFabrics || [],
       isFeatured: product.isFeatured,
     });
     setShowProductForm(true);
@@ -162,6 +165,7 @@ export function AdminDashboard() {
       data.append('price', formData.price);
       data.append('stock', formData.stock);
       data.append('fabrics', formData.fabrics);
+      data.append('availableFabrics', JSON.stringify(formData.availableFabrics));
       data.append('isFeatured', String(formData.isFeatured));
 
       if (imageFile) {
@@ -478,7 +482,7 @@ export function AdminDashboard() {
 
                       <div>
                         <label className="block text-sm font-medium mb-1">
-                          Stoffe
+                          Stoffe (Textbeschreibung)
                         </label>
                         <input
                           type="text"
@@ -489,6 +493,52 @@ export function AdminDashboard() {
                           className="w-full px-4 py-2 border rounded-lg"
                           placeholder="z.B. Jersey, Baumwolle"
                         />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Stoffauswahl (für Kunden)
+                        </label>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Wählen Sie Stoffe aus, aus denen Kunden dieses Produkt fertigen lassen können
+                        </p>
+                        <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                          {fabrics.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-2">
+                              Keine Stoffe verfügbar. Erstellen Sie zuerst Stoffe im "Stoffe" Tab.
+                            </p>
+                          ) : (
+                            fabrics.map((fabric) => (
+                              <label
+                                key={fabric.id}
+                                className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={formData.availableFabrics.includes(fabric.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setFormData({
+                                        ...formData,
+                                        availableFabrics: [...formData.availableFabrics, fabric.id],
+                                      });
+                                    } else {
+                                      setFormData({
+                                        ...formData,
+                                        availableFabrics: formData.availableFabrics.filter(
+                                          (id) => id !== fabric.id
+                                        ),
+                                      });
+                                    }
+                                  }}
+                                  className="h-4 w-4 text-primary-500 rounded border-gray-300"
+                                />
+                                <span className="text-sm">{fabric.name}</span>
+                                <span className="text-xs text-gray-400">({fabric.fabricType})</span>
+                              </label>
+                            ))
+                          )}
+                        </div>
                       </div>
 
                       <div>

@@ -80,17 +80,17 @@ export async function generateInvoice(order: IOrder): Promise<string> {
         .text('Telefon: 015565 612722', 140, 110)
         .text('www.henkes-stoffzauber.de', 140, 125);
 
-      // Invoice title
+      // Invoice title - Right aligned with proper width
       doc
         .fontSize(20)
         .fillColor('#5A4747')
-        .text('RECHNUNG', 400, 50, { align: 'right' });
+        .text('RECHNUNG', 350, 50, { align: 'right', width: 195 });
 
       doc
         .fontSize(10)
         .fillColor('#666')
-        .text(`Rechnungsnummer: ${order.orderNumber}`, 400, 80, { align: 'right' })
-        .text(`Datum: ${new Date(order.createdAt || Date.now()).toLocaleDateString('de-DE')}`, 400, 95, { align: 'right' });
+        .text(`Nr: ${order.orderNumber}`, 350, 80, { align: 'right', width: 195 })
+        .text(`Datum: ${new Date(order.createdAt || Date.now()).toLocaleDateString('de-DE')}`, 350, 95, { align: 'right', width: 195 });
 
       // Horizontal line
       doc
