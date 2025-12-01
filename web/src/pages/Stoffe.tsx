@@ -35,13 +35,21 @@ export function Stoffe() {
       </Helmet>
 
       <div className="min-h-screen bg-neutral-50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-secondary-100 to-primary-100 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl font-bold text-neutral-800 mb-4">
+        {/* Header with Banner Background */}
+        <div className="relative py-16 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/api/uploads/1764276141636-banner.jpg"
+              alt="Banner"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-secondary-100/90 to-primary-100/90"></div>
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl font-bold text-neutral-800 mb-4 drop-shadow-sm">
               Unsere Stoffe
             </h1>
-            <p className="text-neutral-600 max-w-2xl mx-auto">
+            <p className="text-neutral-800 max-w-2xl mx-auto drop-shadow-sm">
               Hochwertige Materialien für Ihre kreativen Nähprojekte. Jeder Stoff
               wird sorgfältig ausgewählt.
             </p>

@@ -36,15 +36,25 @@ export function Home() {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-100 via-primary-50 to-secondary-100 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 md:py-24 overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/api/uploads/1764276141636-banner.jpg"
+            alt="Henkes Stoffzauber Banner"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-100/90 via-primary-50/85 to-secondary-100/90"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-800 mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-800 mb-6 drop-shadow-sm">
                 Willkommen bei{' '}
                 <span className="text-primary-500">Henkes Stoffzauber</span>
               </h1>
-              <p className="text-lg md:text-xl text-neutral-700 mb-8 max-w-2xl">
+              <p className="text-lg md:text-xl text-neutral-800 mb-8 max-w-2xl drop-shadow-sm">
                 Entdecken Sie hochwertige Stoffe, kreative Ideen und liebevoll
                 gefertigte Produkte. Perfekt für jedes Nähprojekt!
               </p>
@@ -79,10 +89,10 @@ export function Home() {
         </div>
 
         {/* Decorative elements */}
-        <div className="absolute top-10 left-10 text-4xl opacity-20 animate-pulse">
+        <div className="absolute top-10 left-10 text-4xl opacity-30 animate-pulse z-10 drop-shadow-lg">
           🧵
         </div>
-        <div className="absolute bottom-10 right-10 text-4xl opacity-20 animate-pulse delay-500">
+        <div className="absolute bottom-10 right-10 text-4xl opacity-30 animate-pulse delay-500 z-10 drop-shadow-lg">
           ✂️
         </div>
       </section>

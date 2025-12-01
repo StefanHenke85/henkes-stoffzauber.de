@@ -71,13 +71,21 @@ export function Shop() {
       </Helmet>
 
       <div className="min-h-screen bg-neutral-50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-primary-100 to-secondary-100 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-4xl font-bold text-neutral-800 text-center mb-4">
+        {/* Header with Banner Background */}
+        <div className="relative py-12 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/api/uploads/1764276141636-banner.jpg"
+              alt="Banner"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-100/90 to-secondary-100/90"></div>
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl font-bold text-neutral-800 text-center mb-4 drop-shadow-sm">
               Schau dich um ✨
             </h1>
-            <p className="text-neutral-600 text-center max-w-2xl mx-auto">
+            <p className="text-neutral-800 text-center max-w-2xl mx-auto drop-shadow-sm">
               Entdecke unsere handgefertigten Kreationen - jedes Stück ein Unikat!
             </p>
           </div>
