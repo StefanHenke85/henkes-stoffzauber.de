@@ -19,6 +19,7 @@ export interface Product {
   imageUrlWebp?: string;
   thumbnailUrl?: string;
   fabrics?: string;
+  availableFabrics?: string[];
   isFeatured: boolean;
   isActive: boolean;
   createdAt: string;

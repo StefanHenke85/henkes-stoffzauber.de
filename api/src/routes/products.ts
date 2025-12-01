@@ -148,7 +148,7 @@ router.post(
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const { name, description, price, stock, fabrics, isFeatured } = req.body;
+      const { name, description, price, stock, fabrics, availableFabrics, isFeatured } = req.body;
 
       let imageUrl = req.body.imageUrl || '';
       let imageUrlWebp = '';
@@ -167,12 +167,25 @@ router.post(
         }
       }
 
+      // Parse availableFabrics if it's a JSON string
+      let parsedAvailableFabrics: string[] | undefined;
+      if (availableFabrics) {
+        try {
+          parsedAvailableFabrics = typeof availableFabrics === 'string'
+            ? JSON.parse(availableFabrics)
+            : availableFabrics;
+        } catch {
+          parsedAvailableFabrics = [];
+        }
+      }
+
       const product = productsStore.create({
         name: name || '',
         description: description || '',
         price: Number(price) || 0,
         stock: Number(stock) || 0,
         fabrics: fabrics || '',
+        availableFabrics: parsedAvailableFabrics,
         isFeatured: isFeatured === 'true' || isFeatured === true,
         isActive: true,
         imageUrl,
@@ -226,6 +239,15 @@ router.put(
       if (req.body.price !== undefined) updates.price = Number(req.body.price);
       if (req.body.stock !== undefined) updates.stock = Number(req.body.stock);
       if (req.body.fabrics !== undefined) updates.fabrics = req.body.fabrics;
+      if (req.body.availableFabrics !== undefined) {
+        try {
+          updates.availableFabrics = typeof req.body.availableFabrics === 'string'
+            ? JSON.parse(req.body.availableFabrics)
+            : req.body.availableFabrics;
+        } catch {
+          updates.availableFabrics = [];
+        }
+      }
       if (req.body.isFeatured !== undefined) {
         updates.isFeatured = req.body.isFeatured === 'true' || req.body.isFeatured === true;
       }
