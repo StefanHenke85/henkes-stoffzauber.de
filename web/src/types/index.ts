@@ -114,6 +114,7 @@ export interface CheckoutData {
   cart: CartItem[];
   address: Customer;
   paymentMethod: 'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup';
+  customerNotes?: string;
 }
 
 export interface CheckoutResponse {
