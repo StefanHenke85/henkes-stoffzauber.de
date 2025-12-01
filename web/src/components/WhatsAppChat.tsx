@@ -8,7 +8,8 @@ export function WhatsAppChat() {
 
   const handleSend = () => {
     if (message.trim()) {
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      // Use web.whatsapp.com for desktop/web, wa.me redirects to app
+      const whatsappUrl = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
       setMessage(''); // Clear message after sending
       setIsOpen(false); // Close popup
@@ -39,6 +40,7 @@ export function WhatsAppChat() {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
                 className="text-neutral-400 hover:text-neutral-600 transition-colors"
                 aria-label="Schließen"
@@ -80,6 +82,7 @@ export function WhatsAppChat() {
         )}
 
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="h-14 w-14 rounded-full bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl flex items-center justify-center transition-all transform hover:scale-110"
           aria-label="WhatsApp Chat öffnen"
