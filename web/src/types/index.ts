@@ -1,16 +1,3 @@
-// Fabric types
-export interface Fabric {
-  id: string;
-  _id?: string;
-  name: string;
-  description: string;
-  imageUrl?: string;
-  isFeatured: boolean;
-  isActive: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 // Product types
 export interface Product {
   id: string;
@@ -67,7 +54,7 @@ export interface Order {
   subtotal: number;
   shipping: number;
   total: number;
-  paymentMethod: 'paypal' | 'invoice' | 'prepayment';
+  paymentMethod: 'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   orderStatus: 'new' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   invoicePath?: string;
@@ -99,10 +86,11 @@ export interface PaginatedResponse<T> {
 // Fabric types
 export interface Fabric {
   id: string;
+  _id?: string;
   name: string;
   description: string;
   fabricType: string;
-  imageUrl: string;
+  imageUrl?: string;
   imageUrlWebp?: string;
   thumbnailUrl?: string;
   color?: string;
@@ -125,7 +113,7 @@ export interface AuthUser {
 export interface CheckoutData {
   cart: CartItem[];
   address: Customer;
-  paymentMethod: 'paypal' | 'invoice' | 'prepayment';
+  paymentMethod: 'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup';
 }
 
 export interface CheckoutResponse {
