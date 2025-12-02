@@ -1,0 +1,9 @@
+# robots.txt für Henkes Stoffzauber
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://henkes-stoffzauber.de/sitemap.xml

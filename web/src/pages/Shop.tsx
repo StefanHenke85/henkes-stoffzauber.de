@@ -63,11 +63,12 @@ export function Shop() {
   return (
     <>
       <Helmet>
-        <title>Shop - Henkes Stoffzauber</title>
+        <title>Shop - Handgefertigte Stoffprodukte | Henkes Stoffzauber</title>
         <meta
           name="description"
-          content="Entdecken Sie unsere handgefertigten Produkte. Mützen, Schals, Loops und mehr - alles mit Liebe genäht."
+          content="Entdecken Sie unsere handgefertigten Produkte: Mützen, Schals, Loops, Taschen und mehr. Jedes Stück ein Unikat aus hochwertigen Stoffen. Kostenloser Versand ab 50€."
         />
+        <link rel="canonical" href="https://henkes-stoffzauber.de/shop" />
       </Helmet>
 
       <div className="min-h-screen bg-neutral-50">

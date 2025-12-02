@@ -110,11 +110,14 @@ export function ProductDetail() {
   return (
     <>
       <Helmet>
-        <title>{product.name} - Henkes Stoffzauber</title>
+        <title>{product.name} - Handgemacht | Henkes Stoffzauber</title>
         <meta name="description" content={product.description?.slice(0, 160)} />
+        <link rel="canonical" href={`https://henkes-stoffzauber.de/product/${productId}`} />
+        <meta property="og:type" content="product" />
         <meta property="og:title" content={`${product.name} - Henkes Stoffzauber`} />
         <meta property="og:description" content={product.description?.slice(0, 160)} />
         <meta property="og:image" content={imageUrl} />
+        <meta property="og:url" content={`https://henkes-stoffzauber.de/product/${productId}`} />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',

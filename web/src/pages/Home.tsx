@@ -28,11 +28,12 @@ export function Home() {
   return (
     <>
       <Helmet>
-        <title>Henkes Stoffzauber - Handgemachte Stoffe & Nähkreationen</title>
+        <title>Henkes Stoffzauber - Handgemachte Stoffe & Nähkreationen aus Rheinberg</title>
         <meta
           name="description"
-          content="Entdecken Sie hochwertige Stoffe, kreative Ideen und liebevoll gefertigte Produkte bei Henkes Stoffzauber. Perfekt für jedes Nähprojekt!"
+          content="Hochwertige handgefertigte Stoffprodukte aus Rheinberg. Mützen, Schals, Loops und individuelle Nähkreationen. Kostenloser Versand ab 50€."
         />
+        <link rel="canonical" href="https://henkes-stoffzauber.de/" />
       </Helmet>
 
       {/* Hero Section */}

@@ -27,11 +27,12 @@ export function Stoffe() {
   return (
     <>
       <Helmet>
-        <title>Stoffe - Henkes Stoffzauber</title>
+        <title>Hochwertige Stoffe - Jersey, Baumwolle, Fleece | Henkes Stoffzauber</title>
         <meta
           name="description"
-          content="Entdecken Sie unsere Stoffauswahl: Jersey, Baumwolle, Fleece und mehr. Hochwertige Materialien für Ihre Nähprojekte."
+          content="Entdecken Sie unsere Stoffauswahl: Jersey, Baumwolle, Fleece, Softshell und mehr. Hochwertige Materialien für Ihre Nähprojekte - sorgfältig ausgewählt und geprüft."
         />
+        <link rel="canonical" href="https://henkes-stoffzauber.de/stoffe" />
       </Helmet>
 
       <div className="min-h-screen bg-neutral-50">
