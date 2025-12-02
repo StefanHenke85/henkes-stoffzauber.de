@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node prerender.js",
+    "build:no-prerender": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
@@ -34,6 +35,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3",
-    "vite": "^5.0.10"
+    "vite": "^5.0.10",
+    "vite-plugin-ssr": "^0.4.142"
   }
 }
