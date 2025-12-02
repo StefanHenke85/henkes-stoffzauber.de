@@ -13,6 +13,7 @@ import {
   Check,
   Palette,
   Camera,
+  Download,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,11 +78,32 @@ export function AdminDashboard() {
   const [fabricFormLoading, setFabricFormLoading] = useState(false);
   const [showFabricCamera, setShowFabricCamera] = useState(false);
 
+  // PWA Install
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/admin');
     }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   useEffect(() => {
     loadProducts();
@@ -126,6 +148,20 @@ export function AdminDashboard() {
     await logout();
     navigate('/admin');
     toast.success('Erfolgreich abgemeldet');
+  };
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      toast.success('App erfolgreich installiert!');
+      setShowInstallButton(false);
+    }
+
+    setDeferredPrompt(null);
   };
 
   // Product form handlers
@@ -339,6 +375,18 @@ export function AdminDashboard() {
               </h1>
               <div className="flex items-center gap-4">
                 <span className="text-neutral-500">Hallo, {user.username}</span>
+
+                {showInstallButton && (
+                  <button
+                    onClick={handleInstallClick}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors"
+                    title="App auf dem Gerät installieren"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">App installieren</span>
+                  </button>
+                )}
+
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
