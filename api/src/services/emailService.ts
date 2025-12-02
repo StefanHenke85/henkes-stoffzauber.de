@@ -5,15 +5,21 @@ import { EmailOptions, IOrder } from '../types';
 
 // Create reusable transporter
 const createTransporter = () => {
-  return nodemailer.createTransport({
+  const config: any = {
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
     secure: env.SMTP_PORT === 465,
-    auth: {
+  };
+
+  // Only add auth if credentials are provided (not needed for local SMTP)
+  if (env.SMTP_USER && env.SMTP_PASS) {
+    config.auth = {
       user: env.SMTP_USER,
       pass: env.SMTP_PASS,
-    },
-  });
+    };
+  }
+
+  return nodemailer.createTransport(config);
 };
 
 let transporter = createTransporter();
@@ -23,8 +29,9 @@ let transporter = createTransporter();
  */
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
   try {
+    const fromEmail = env.SMTP_USER || env.SHOP_EMAIL || 'noreply@henkes-stoffzauber.de';
     await transporter.sendMail({
-      from: `"Henkes Stoffzauber" <${env.SMTP_USER}>`,
+      from: `"Henkes Stoffzauber" <${fromEmail}>`,
       to: options.to,
       subject: options.subject,
       text: options.text,
