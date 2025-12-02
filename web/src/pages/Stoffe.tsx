@@ -180,8 +180,10 @@ export function Stoffe() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setSelectedFabric(null)}
                     className="text-neutral-400 hover:text-neutral-600"
+                    aria-label="Stoff-Details schließen"
                   >
                     <svg
                       className="h-6 w-6"

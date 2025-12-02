@@ -419,8 +419,9 @@ export function AdminDashboard() {
 
                     <form onSubmit={handleSubmitProduct} className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">Name</label>
+                        <label htmlFor="product-name" className="block text-sm font-medium mb-1">Name</label>
                         <input
+                          id="product-name"
                           type="text"
                           value={formData.name}
                           onChange={(e) =>
@@ -432,10 +433,11 @@ export function AdminDashboard() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <label htmlFor="product-description" className="block text-sm font-medium mb-1">
                           Beschreibung
                         </label>
                         <textarea
+                          id="product-description"
                           value={formData.description}
                           onChange={(e) =>
                             setFormData({ ...formData, description: e.target.value })
@@ -448,10 +450,11 @@ export function AdminDashboard() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium mb-1">
+                          <label htmlFor="product-price" className="block text-sm font-medium mb-1">
                             Preis (EUR)
                           </label>
                           <input
+                            id="product-price"
                             type="number"
                             step="0.01"
                             min="0"
@@ -464,10 +467,11 @@ export function AdminDashboard() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-1">
+                          <label htmlFor="product-stock" className="block text-sm font-medium mb-1">
                             Bestand
                           </label>
                           <input
+                            id="product-stock"
                             type="number"
                             min="0"
                             value={formData.stock}
@@ -542,8 +546,9 @@ export function AdminDashboard() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1">Bild</label>
+                        <label htmlFor="product-image" className="block text-sm font-medium mb-1">Bild</label>
                         <input
+                          id="product-image"
                           type="file"
                           accept="image/*"
                           onChange={(e) =>
@@ -641,14 +646,18 @@ export function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 text-right">
                             <button
+                              type="button"
                               onClick={() => handleEditProduct(product)}
                               className="p-2 hover:bg-gray-100 rounded"
+                              aria-label={`Produkt ${product.name} bearbeiten`}
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleDeleteProduct(product)}
                               className="p-2 hover:bg-red-50 text-red-500 rounded"
+                              aria-label={`Produkt ${product.name} löschen`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -712,13 +721,15 @@ export function AdminDashboard() {
                         </div>
 
                         <div>
-                          <p className="text-sm text-gray-500 mb-1">Bestellstatus</p>
+                          <label htmlFor={`order-status-${order.id}`} className="text-sm text-gray-500 mb-1 block">Bestellstatus</label>
                           <select
+                            id={`order-status-${order.id}`}
                             value={order.orderStatus}
                             onChange={(e) =>
                               handleUpdateOrderStatus(order, 'orderStatus', e.target.value)
                             }
                             className="px-3 py-1.5 border rounded-lg text-sm w-full"
+                            aria-label="Bestellstatus ändern"
                           >
                             <option value="new">Neu</option>
                             <option value="processing">In Bearbeitung</option>
@@ -729,13 +740,15 @@ export function AdminDashboard() {
                         </div>
 
                         <div>
-                          <p className="text-sm text-gray-500 mb-1">Zahlungsstatus</p>
+                          <label htmlFor={`payment-status-${order.id}`} className="text-sm text-gray-500 mb-1 block">Zahlungsstatus</label>
                           <select
+                            id={`payment-status-${order.id}`}
                             value={order.paymentStatus}
                             onChange={(e) =>
                               handleUpdateOrderStatus(order, 'paymentStatus', e.target.value)
                             }
                             className="px-3 py-1.5 border rounded-lg text-sm w-full"
+                            aria-label="Zahlungsstatus ändern"
                           >
                             <option value="pending">Ausstehend</option>
                             <option value="paid">Bezahlt</option>
@@ -804,8 +817,9 @@ export function AdminDashboard() {
 
                     <form onSubmit={handleSubmitFabric} className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">Name</label>
+                        <label htmlFor="fabric-name" className="block text-sm font-medium mb-1">Name</label>
                         <input
+                          id="fabric-name"
                           type="text"
                           value={fabricFormData.name}
                           onChange={(e) =>
@@ -817,10 +831,11 @@ export function AdminDashboard() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <label htmlFor="fabric-description" className="block text-sm font-medium mb-1">
                           Beschreibung
                         </label>
                         <textarea
+                          id="fabric-description"
                           value={fabricFormData.description}
                           onChange={(e) =>
                             setFabricFormData({ ...fabricFormData, description: e.target.value })
@@ -911,8 +926,9 @@ export function AdminDashboard() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1">Bild</label>
+                        <label htmlFor="fabric-image" className="block text-sm font-medium mb-1">Bild</label>
                         <input
+                          id="fabric-image"
                           type="file"
                           accept="image/*"
                           onChange={(e) =>
@@ -1010,14 +1026,18 @@ export function AdminDashboard() {
                         </div>
                         <div className="flex justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => handleEditFabric(fabric)}
                             className="p-2 hover:bg-gray-100 rounded"
+                            aria-label={`Stoff ${fabric.name} bearbeiten`}
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDeleteFabric(fabric)}
                             className="p-2 hover:bg-red-50 text-red-500 rounded"
+                            aria-label={`Stoff ${fabric.name} löschen`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

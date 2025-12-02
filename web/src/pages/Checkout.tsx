@@ -155,10 +155,11 @@ export function Checkout() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="firstName" className="block text-sm font-medium text-neutral-700 mb-1">
                         Vorname *
                       </label>
                       <input
+                        id="firstName"
                         type="text"
                         name="firstName"
                         value={address.firstName}
@@ -174,10 +175,11 @@ export function Checkout() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="lastName" className="block text-sm font-medium text-neutral-700 mb-1">
                         Nachname *
                       </label>
                       <input
+                        id="lastName"
                         type="text"
                         name="lastName"
                         value={address.lastName}
@@ -193,10 +195,11 @@ export function Checkout() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
                         E-Mail *
                       </label>
                       <input
+                        id="email"
                         type="email"
                         name="email"
                         value={address.email}
@@ -212,10 +215,11 @@ export function Checkout() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="phone" className="block text-sm font-medium text-neutral-700 mb-1">
                         Telefon (optional)
                       </label>
                       <input
+                        id="phone"
                         type="tel"
                         name="phone"
                         value={address.phone}
@@ -225,10 +229,11 @@ export function Checkout() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="street" className="block text-sm font-medium text-neutral-700 mb-1">
                         Straße *
                       </label>
                       <input
+                        id="street"
                         type="text"
                         name="street"
                         value={address.street}
@@ -244,10 +249,11 @@ export function Checkout() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="houseNumber" className="block text-sm font-medium text-neutral-700 mb-1">
                         Hausnummer *
                       </label>
                       <input
+                        id="houseNumber"
                         type="text"
                         name="houseNumber"
                         value={address.houseNumber}
@@ -263,10 +269,11 @@ export function Checkout() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="zip" className="block text-sm font-medium text-neutral-700 mb-1">
                         PLZ *
                       </label>
                       <input
+                        id="zip"
                         type="text"
                         name="zip"
                         value={address.zip}
@@ -283,10 +290,11 @@ export function Checkout() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
                         Stadt *
                       </label>
                       <input
+                        id="city"
                         type="text"
                         name="city"
                         value={address.city}
