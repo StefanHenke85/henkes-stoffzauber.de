@@ -245,6 +245,16 @@ export const ordersStore = {
     return orders[index];
   },
 
+  delete(id: string): Order | null {
+    const orders = this.getAll();
+    const index = orders.findIndex((o: Order) => o.id === id);
+    if (index === -1) return null;
+
+    const deleted = orders.splice(index, 1)[0];
+    writeJsonFile('orders.json', orders);
+    return deleted;
+  },
+
   getPaginated(page: number, limit: number, filter?: { orderStatus?: string; paymentStatus?: string }) {
     let orders = this.getAll();
 

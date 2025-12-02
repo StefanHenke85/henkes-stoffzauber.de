@@ -144,6 +144,10 @@ const orderSchema = new Schema<OrderDocument>(
       type: String,
       maxlength: 1000,
     },
+    customerNotes: {
+      type: String,
+      maxlength: 1000,
+    },
   },
   {
     timestamps: true,
