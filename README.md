@@ -1,77 +1,110 @@
-# Henkes Stoffzauber
+# Henkes Stoffzauber 🧵
 
-Moderne E-Commerce Plattform für handgefertigte Stoffe und Nähkreationen.
+Moderne E-Commerce Plattform für handgefertigte Stoffe und Nähkreationen aus Rheinberg.
 
-## Tech Stack
+🌐 **Live:** [henkes-stoffzauber.de](https://henkes-stoffzauber.de)
+
+## 🚀 Tech Stack
 
 ### Backend (API)
 - **Node.js 20** mit TypeScript
-- **Express.js 4.18** (stabil, nicht Beta)
-- **MongoDB** mit Mongoose ODM
+- **Express.js 4.18** - REST API
+- **JSON File Storage** - Einfache Datenhaltung
 - **Security**: Helmet, CORS, Rate Limiting, bcrypt, JWT (httpOnly Cookies)
-- **Image Processing**: Sharp (WebP-Konvertierung, Thumbnails)
-- **Email**: Nodemailer
+- **Email**: Nodemailer → Postfix → Gmail Relay
+- **PDF**: PDFKit für Rechnungserstellung (SEPA QR-Codes)
 - **Payment**: PayPal SDK
+- **Deployment**: PM2 Process Manager
 
 ### Frontend (Web)
 - **React 18** mit TypeScript
-- **Vite** (statt Create React App)
-- **Tailwind CSS** für Styling
-- **React Router 6** für Navigation
-- **React Helmet Async** für SEO
-- **Lucide React** für Icons
+- **Vite** - Build Tool
+- **Tailwind CSS** - Styling
+- **React Router 6** - Navigation
+- **React Helmet Async** - SEO Optimization
+- **Lucide React** - Icons
+- **Tawk.to** - Live Chat Integration
 
 ### Infrastructure
-- **Docker** mit Docker Compose
-- **MongoDB 7.0** als Datenbank
-- **Nginx** als Reverse Proxy
-- **Let's Encrypt** für SSL
+- **VPS Server**: 81.7.11.191
+- **Nginx** - Reverse Proxy & Static File Serving
+- **PM2** - Process Management
+- **Postfix** - SMTP Server mit Gmail Relay
+- **Let's Encrypt** - SSL Zertifikate
+- **DNS**: SPF & DMARC konfiguriert
 
-## Projektstruktur
+## 📁 Projektstruktur
 
 ```
-henkes-stoffzauber.de/
-├── api/                    # Backend (Express + TypeScript)
+henkes-stoffzauber/
+├── api/                      # Express Backend
 │   ├── src/
-│   │   ├── config/         # Konfiguration (DB, Environment)
-│   │   ├── controllers/    # Route Handler
-│   │   ├── middleware/     # Auth, Security, Validation
-│   │   ├── models/         # Mongoose Models
-│   │   ├── routes/         # API Routes
-│   │   ├── services/       # Business Logic (Email, PDF, PayPal)
-│   │   ├── types/          # TypeScript Typen
-│   │   └── utils/          # Hilfsfunktionen
-│   ├── Dockerfile
-│   └── package.json
+│   │   ├── config/           # Environment, Logger
+│   │   ├── data/             # JSON File Store
+│   │   ├── middleware/       # Auth, Security, Rate Limiting
+│   │   ├── models/           # TypeScript Interfaces
+│   │   ├── routes/           # API Routes
+│   │   │   ├── auth.ts       # Login, Logout, Auth Check
+│   │   │   ├── orders.ts     # Bestellungen, Checkout
+│   │   │   ├── products.ts   # Produktverwaltung
+│   │   │   └── fabrics.ts    # Stoffverwaltung
+│   │   ├── services/         # Business Logic
+│   │   │   ├── emailService.ts   # Nodemailer
+│   │   │   ├── pdfService.ts     # PDF-Rechnungen
+│   │   │   └── paypalService.ts  # PayPal Integration
+│   │   ├── types/            # TypeScript Types
+│   │   └── utils/            # Helper Functions
+│   ├── uploads/              # Produktbilder
+│   ├── invoices/             # PDF-Rechnungen
+│   └── data/                 # JSON Datenbank
 │
-├── web/                    # Frontend (Vite + React)
+├── web/                      # Vite + React Frontend
 │   ├── src/
-│   │   ├── components/     # UI Komponenten
-│   │   ├── contexts/       # React Contexts (Cart, Auth)
-│   │   ├── pages/          # Seiten-Komponenten
-│   │   ├── types/          # TypeScript Typen
-│   │   └── utils/          # API Client, Helpers
-│   ├── Dockerfile
-│   └── package.json
+│   │   ├── components/       # UI Components
+│   │   │   ├── Layout.tsx        # Header, Footer, Nav
+│   │   │   ├── ProductCard.tsx   # Produktkarte
+│   │   │   ├── CartSidebar.tsx   # Warenkorb Sidebar
+│   │   │   └── TawkToChat.tsx    # Live Chat Widget
+│   │   ├── contexts/         # React Context API
+│   │   │   ├── CartContext.tsx   # Warenkorb State
+│   │   │   └── AuthContext.tsx   # Admin Auth
+│   │   ├── pages/            # Seiten-Komponenten
+│   │   │   ├── Home.tsx          # Startseite
+│   │   │   ├── Shop.tsx          # Produktliste
+│   │   │   ├── ProductDetail.tsx # Produktdetails
+│   │   │   ├── Stoffe.tsx        # Stoffübersicht
+│   │   │   ├── Checkout.tsx      # Checkout-Flow
+│   │   │   ├── AdminDashboard.tsx # Admin Panel
+│   │   │   ├── Impressum.tsx
+│   │   │   └── Datenschutz.tsx
+│   │   ├── types/            # TypeScript Types
+│   │   └── utils/            # API Client, Helpers
+│   ├── public/
+│   │   ├── robots.txt        # SEO Crawler Config
+│   │   └── sitemap.xml       # SEO Sitemap
+│   └── index.html            # SEO Meta Tags
 │
-├── nginx/                  # Nginx Konfiguration
-├── docker/                 # Docker-spezifische Dateien
-├── docker-compose.yml      # Docker Orchestrierung
-└── .env.example            # Umgebungsvariablen Template
+├── nginx/                    # Nginx Konfiguration
+│   └── sites-available/
+│       └── henkes-stoffzauber.de
+│
+├── deploy.sh                 # Lokales Deployment
+├── deploy-server.sh          # Server Deployment
+├── fix-nginx-uploads*.sh     # Server Maintenance
+└── .env.example              # Environment Template
 ```
 
-## Lokale Entwicklung
+## 🛠️ Lokale Entwicklung
 
 ### Voraussetzungen
 - Node.js 20+
 - npm oder yarn
-- Docker (optional, für MongoDB)
 
 ### Setup
 
 1. **Repository klonen & Dependencies installieren:**
 ```bash
-cd henkes-stoffzauber.de
+cd henkes-stoffzauber
 
 # API
 cd api
@@ -83,157 +116,306 @@ cd ../web
 npm install
 ```
 
-2. **MongoDB starten (mit Docker):**
-```bash
-docker run -d --name mongodb -p 27017:27017 mongo:7.0
-```
-
-3. **Entwicklungsserver starten:**
+2. **Entwicklungsserver starten:**
 ```bash
 # Terminal 1: API
 cd api
-npm run dev
+npm run dev       # Läuft auf Port 3001
 
 # Terminal 2: Web
 cd web
-npm run dev
+npm run dev       # Läuft auf Port 5173
 ```
 
-4. **Öffnen:** http://localhost:5173
+3. **Öffnen:** http://localhost:5173
 
-### Migration bestehender Daten
+### Environment Variablen (.env)
 
-Falls Daten aus dem alten JSON-basierten System existieren:
+**API (.env):**
 
-```bash
-cd api
-npx tsx src/scripts/migrate.ts
+```env
+NODE_ENV=development
+PORT=3001
+FRONTEND_URL=http://localhost:5173
+
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=SecurePassword123!
+JWT_SECRET=your-secret-key
+
+# Email (SMTP)
+SMTP_HOST=localhost
+SMTP_PORT=25
+SMTP_USER=
+SMTP_PASS=
+SHOP_EMAIL=info@henkes-stoffzauber.de
+ADMIN_EMAIL=henke.stefan1985@gmail.com
+
+# PayPal
+PAYPAL_CLIENT_ID=your-client-id
+PAYPAL_CLIENT_SECRET=your-client-secret
+PAYPAL_MODE=sandbox
+
+# Storage
+UPLOAD_PATH=./uploads
 ```
 
-## Production Deployment
+## 🚢 Production Deployment
 
-### 1. Server vorbereiten (Ubuntu/Debian)
+### Aktuelle Server-Konfiguration
+
+- **Server:** VPS 81.7.11.191
+- **Domain:** henkes-stoffzauber.de
+- **SSL:** Let's Encrypt (Auto-Renewal)
+- **Deployment:** PM2 mit GitHub Auto-Deploy
+
+### Deployment-Prozess
+
+1. **Code pushen:**
 
 ```bash
-# Docker installieren
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-
-# Docker Compose installieren
-sudo apt install docker-compose-plugin
+git add .
+git commit -m "feat: Neue Funktion"
+git push
 ```
 
-### 2. Projekt auf Server kopieren
+2. **Auf Server deployen:**
 
 ```bash
-scp -r henkes-stoffzauber.de user@server:/var/www/
+./deploy-server.sh
 ```
 
-### 3. Umgebungsvariablen konfigurieren
+Oder manuell:
 
 ```bash
+ssh root@81.7.11.191
 cd /var/www/henkes-stoffzauber.de
-cp .env.example .env
-nano .env  # Alle Werte anpassen!
+git pull
+cd api && npm install && pm2 restart henkes-api
+cd ../web && npm run build
 ```
 
-### 4. SSL-Zertifikat erstellen (Let's Encrypt)
+### Server-Struktur
+
+```text
+/var/www/henkes-stoffzauber.de/
+├── api/              # Backend (läuft mit PM2)
+├── web/dist/         # Frontend Build (served by Nginx)
+└── api/uploads/      # Hochgeladene Bilder (Nginx Static)
+```
+
+### PM2 Prozesse
 
 ```bash
-# Erst mal Nginx mit HTTP starten für Zertifikatserstellung
-docker compose up -d nginx
-
-# Zertifikat erstellen
-docker compose run --rm certbot certonly --webroot \
-  --webroot-path /var/www/certbot \
-  -d henkes-stoffzauber.de \
-  -d www.henkes-stoffzauber.de \
-  --email info@henkes-stoffzauber.de \
-  --agree-tos
-
-# Nginx neustarten mit SSL
-docker compose restart nginx
+pm2 list              # Alle Prozesse anzeigen
+pm2 restart henkes-api # API neu starten
+pm2 logs henkes-api   # Logs anzeigen
+pm2 monit             # Monitoring
 ```
 
-### 5. Alle Services starten
+### Nginx Konfiguration
 
-```bash
-docker compose up -d
-```
+- **Port 80:** HTTP → HTTPS Redirect
+- **Port 443:** HTTPS mit SSL
+- **Frontend:** Root `/var/www/henkes-stoffzauber.de/web/dist`
+- **API:** Proxy zu `http://localhost:3001/api`
+- **Uploads:** Static Files `/var/www/henkes-stoffzauber.de/api/uploads`
 
-### 6. Logs prüfen
+## 📡 API Endpoints
 
-```bash
-docker compose logs -f
-```
+### Public Endpoints
 
-## API Endpoints
-
-### Public
-- `GET /api/products` - Alle Produkte
+- `GET /api/products` - Alle aktiven Produkte
 - `GET /api/products/featured` - Featured Produkte
 - `GET /api/products/:id` - Einzelnes Produkt
+- `GET /api/fabrics` - Alle Stoffe
 - `POST /api/checkout` - Bestellung erstellen
-- `POST /api/checkout/capture/:id` - PayPal Payment capturen
-- `GET /api/checkout/order/:id` - Bestellung abrufen
+- `POST /api/checkout/capture/:orderId` - PayPal Payment capturen
+- `GET /api/checkout/order/:id` - Bestelldetails abrufen
 
-### Admin (Auth required)
-- `POST /api/auth/login` - Anmelden
-- `POST /api/auth/logout` - Abmelden
-- `GET /api/auth/me` - Aktueller Benutzer
+### Admin Endpoints (Auth required)
+
+- `POST /api/auth/login` - Admin Login
+- `POST /api/auth/logout` - Admin Logout
+- `GET /api/auth/me` - Session Check
+
+**Produkte:**
+
 - `GET /api/products/admin` - Alle Produkte (inkl. inaktive)
-- `POST /api/products` - Produkt erstellen
-- `PUT /api/products/:id` - Produkt aktualisieren
+- `POST /api/products` - Produkt erstellen (mit Upload)
+- `PATCH /api/products/:id` - Produkt aktualisieren
 - `DELETE /api/products/:id` - Produkt löschen
-- `GET /api/orders/admin` - Alle Bestellungen
+
+**Bestellungen:**
+
+- `GET /api/orders/admin` - Alle Bestellungen (mit Pagination)
+- `GET /api/orders/admin/:id` - Einzelne Bestellung
 - `PATCH /api/orders/admin/:id` - Bestellung aktualisieren
+- `DELETE /api/orders/admin/:id` - Bestellung löschen
 
-## Sicherheit
+**Stoffe:**
 
-- ✅ Helmet Security Headers
-- ✅ CORS auf spezifische Origins begrenzt
-- ✅ Rate Limiting (API & Login)
-- ✅ JWT in httpOnly Cookies
-- ✅ Passwort-Hashing mit bcrypt
-- ✅ Input-Validierung mit Zod
-- ✅ File Upload Validierung (nur Bilder, max 5MB)
-- ✅ HTTPS erzwungen in Production
-- ✅ CSP Headers
+- `GET /api/fabrics/admin` - Alle Stoffe
+- `POST /api/fabrics` - Stoff erstellen (mit Upload)
+- `PATCH /api/fabrics/:id` - Stoff aktualisieren
+- `DELETE /api/fabrics/:id` - Stoff löschen
 
-## Backup
+## 🔒 Sicherheit
 
-```bash
-# MongoDB Backup
-docker exec henkes-mongodb mongodump --out /dump --authenticationDatabase admin -u $MONGO_USER -p $MONGO_PASSWORD
+- ✅ **Helmet** - Security Headers
+- ✅ **CORS** - Nur Frontend-Origin erlaubt
+- ✅ **Rate Limiting** - API (100/15min), Checkout (5/15min), Login (5/15min)
+- ✅ **JWT Auth** - httpOnly Cookies (7 Tage)
+- ✅ **bcrypt** - Passwort-Hashing (12 Rounds)
+- ✅ **File Upload** - Nur Bilder, max 5MB, Validierung
+- ✅ **HTTPS** - Let's Encrypt SSL
+- ✅ **CSP** - Content Security Policy
+- ✅ **ARIA** - Barrierefreiheit (WCAG konform)
 
-# Uploads Backup
-docker cp henkes-api:/app/uploads ./backup/uploads
-```
+## 📧 Email-System
 
-## Troubleshooting
+**Konfiguration:**
+- Node.js App → Localhost:25 (Postfix)
+- Postfix → Gmail SMTP (smtp.gmail.com:587)
+- SPF Record: `v=spf1 ip4:81.7.11.191 mx ~all`
+- DMARC: `v=DMARC1; p=none; rua=mailto:info@henkes-stoffzauber.de`
+
+**Email-Typen:**
+
+1. **Bestellbestätigung** (an Kunde) - Mit PDF-Rechnung
+2. **Admin-Benachrichtigung** (an Admin) - Neue Bestellung
+3. **Versandbestätigung** (an Kunde) - Mit Tracking-Nummer
+
+## 📄 PDF-Rechnungen
+
+Features:
+
+- ✅ Vollständige Rechnungsdaten
+- ✅ SEPA QR-Code (EPC Format)
+- ✅ Bankdaten & IBAN
+- ✅ Optimiertes Layout (alles auf 1 Seite)
+- ✅ Henkes Stoffzauber Logo
+- ✅ Kleinunternehmer § 19 UStG
+
+Speicherort: `api/invoices/invoice-{orderNumber}.pdf`
+
+## 🔍 SEO Optimierung
+
+**Umgesetzt:**
+
+- ✅ robots.txt & sitemap.xml
+- ✅ Canonical URLs auf allen Seiten
+- ✅ Optimierte Meta-Tags mit "Rheinberg" (Local SEO)
+- ✅ Open Graph Tags (Facebook/WhatsApp)
+- ✅ Twitter Cards
+- ✅ Structured Data (Schema.org Store + Product)
+- ✅ Semantic HTML (h1, h2, nav, section, article)
+- ✅ Image Alt-Attributes
+- ✅ WCAG Barrierefreiheit
+
+**SEO Score: 9/10** ⭐⭐⭐⭐⭐
+
+## 🛟 Troubleshooting
 
 ### API startet nicht
+
 ```bash
-docker compose logs api
-# Prüfen ob MongoDB läuft
-docker compose ps
+pm2 logs henkes-api    # Fehler anzeigen
+pm2 restart henkes-api # Neu starten
 ```
 
-### MongoDB Connection Error
+### Uploads funktionieren nicht
+
 ```bash
-# Container neu starten
-docker compose restart mongodb
-# Warten bis healthy
-docker compose ps
+./fix-nginx-uploads-v2.sh  # Nginx Upload-Route fixen
+```
+
+### Email kommt nicht an
+
+```bash
+# Postfix Status prüfen
+ssh root@81.7.11.191 "systemctl status postfix"
+
+# Mail Queue prüfen
+ssh root@81.7.11.191 "mailq"
+
+# Logs anzeigen
+ssh root@81.7.11.191 "tail -f /var/log/mail.log"
 ```
 
 ### SSL Probleme
+
 ```bash
-# Zertifikat manuell erneuern
-docker compose run --rm certbot renew
-docker compose restart nginx
+# Zertifikat erneuern
+ssh root@81.7.11.191 "certbot renew"
+ssh root@81.7.11.191 "systemctl reload nginx"
 ```
+
+## 📊 Monitoring
+
+**Live-Checks:**
+
+- API Health: <https://henkes-stoffzauber.de/api/health>
+- Frontend: <https://henkes-stoffzauber.de>
+- PM2 Status: `ssh root@81.7.11.191 "pm2 status"`
+
+## 💾 Backup
+
+**Wichtige Daten:**
+```bash
+# JSON Datenbank
+api/data/products.json
+api/data/orders.json
+api/data/fabrics.json
+
+# Uploads
+api/uploads/
+
+# Rechnungen
+api/invoices/
+```
+
+**Backup erstellen:**
+```bash
+ssh root@81.7.11.191 "tar -czf backup-$(date +%Y%m%d).tar.gz /var/www/henkes-stoffzauber.de/api/data /var/www/henkes-stoffzauber.de/api/uploads /var/www/henkes-stoffzauber.de/api/invoices"
+```
+
+## 📱 Features
+
+### Für Kunden
+
+- 🛍️ Produktkatalog mit Suche & Filter
+- 🧵 Stoffübersicht mit Details
+- 🛒 Warenkorb mit LocalStorage
+- 💳 PayPal, Rechnung, Vorkasse, Barzahlung bei Abholung
+- 📄 Automatische PDF-Rechnung
+- 📧 Email-Bestätigungen
+- 💬 Live-Chat (Tawk.to)
+- 📱 Voll Responsive
+
+### Für Admin
+
+- 🔐 Sicheres Login-System
+- 📦 Produktverwaltung (CRUD)
+- 🧵 Stoffverwaltung (CRUD)
+- 📋 Bestellverwaltung mit Statusänderung
+- 📷 Bild-Upload mit Vorschau
+- 🔔 Bestellbenachrichtigungen per Email
+
+## 🚧 Roadmap
+
+- [ ] Google Business Profile einrichten
+- [ ] Bing Webmaster Tools
+- [ ] Newsletter-System
+- [ ] Kundenbewertungen
+- [ ] Produktvarianten (Größen, Farben)
+- [ ] Rabattcodes/Gutscheine
+- [ ] DHL Versandlabel-Integration
 
 ---
 
-© 2025 Henkes Stoffzauber
+## 👨‍💻 Entwicklung
+
+Entwickelt mit ❤️ für Henkes Stoffzauber
+
+© 2025 Stefan Henke | [henkes-stoffzauber.de](https://henkes-stoffzauber.de)
