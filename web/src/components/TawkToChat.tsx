@@ -10,16 +10,8 @@ declare global {
 export function TawkToChat() {
   useEffect(() => {
     // Tawk.to Configuration
-    // WICHTIG: Ersetze 'YOUR_PROPERTY_ID' und 'YOUR_WIDGET_ID'
-    // mit deinen echten IDs von https://tawk.to/
-    const TAWK_PROPERTY_ID = 'YOUR_PROPERTY_ID'; // z.B. '5f1234567890abcdef123456'
-    const TAWK_WIDGET_ID = 'default'; // oder 'YOUR_WIDGET_ID'
-
-    // Nur laden wenn IDs gesetzt sind
-    if (TAWK_PROPERTY_ID === 'YOUR_PROPERTY_ID') {
-      console.warn('⚠️ Tawk.to noch nicht konfiguriert! Bitte Property ID in TawkToChat.tsx eintragen.');
-      return;
-    }
+    const TAWK_PROPERTY_ID = '692e3005c860c2197de658a6';
+    const TAWK_WIDGET_ID = '1jbe6n5eq';
 
     // Verhindere mehrfaches Laden
     if (window.Tawk_API) {
