@@ -61,75 +61,66 @@ export async function generateInvoice(order: IOrder): Promise<string> {
       const stream = fs.createWriteStream(invoicePath);
       doc.pipe(stream);
 
-      // Logo (if exists) - als rundes Bild
+      // Logo (if exists) - kleiner
       if (fs.existsSync(logoPath)) {
         try {
-          doc.image(logoPath, 50, 45, { width: 70, height: 70, fit: [70, 70] });
+          doc.image(logoPath, 50, 40, { width: 50, height: 50, fit: [50, 50] });
         } catch (logoError) {
           logger.warn('Logo konnte nicht geladen werden:', logoError);
         }
       }
 
-      // Header - Company Info
+      // Header - Company Info - kompakter
       doc
-        .fontSize(20)
+        .fontSize(16)
         .fillColor('#5A4747')
         .font('Helvetica-Bold')
-        .text("Henkes Stoffzauber", 130, 50);
+        .text("Henkes Stoffzauber", 110, 40);
 
       doc
-        .fontSize(9)
+        .fontSize(8)
         .fillColor('#666')
         .font('Helvetica')
-        .text('Rheinstraße 40  •  47495 Rheinberg', 130, 75)
-        .text('Tel: 015565 612722  •  www.henkes-stoffzauber.de', 130, 88);
+        .text('Rheinstraße 40  •  47495 Rheinberg  •  Tel: 015565 612722', 110, 58);
 
-      // Invoice title - Right aligned (keine Überlappung!)
+      // Invoice title - Right aligned, kompakter
       doc
-        .fontSize(18)
+        .fontSize(16)
         .fillColor('#5A4747')
         .font('Helvetica-Bold')
-        .text('RECHNUNG', 400, 50, { align: 'right', width: 145 });
+        .text('RECHNUNG', 380, 40, { align: 'right', width: 165 });
 
-      // Rechnungsnummer und Datum untereinander
+      // Rechnungsnummer und Datum - kompakter
       doc
-        .fontSize(9)
+        .fontSize(8)
         .fillColor('#666')
         .font('Helvetica')
-        .text(`Rechnungsnr.:`, 400, 75, { align: 'right', width: 145 })
-        .font('Helvetica-Bold')
-        .text(`${order.orderNumber}`, 400, 87, { align: 'right', width: 145 })
-        .font('Helvetica')
-        .text(`Datum:`, 400, 103, { align: 'right', width: 145 })
-        .text(`${new Date(order.createdAt || Date.now()).toLocaleDateString('de-DE')}`, 400, 115, { align: 'right', width: 145 });
+        .text(`Nr: ${order.orderNumber}  •  ${new Date(order.createdAt || Date.now()).toLocaleDateString('de-DE')}`, 380, 58, { align: 'right', width: 165 });
 
-      // Horizontal line (weiter unten wegen höherem Header)
+      // Horizontal line - höher
       doc
         .strokeColor('#F2B2B4')
-        .lineWidth(2)
-        .moveTo(50, 145)
-        .lineTo(545, 145)
+        .lineWidth(1)
+        .moveTo(50, 85)
+        .lineTo(545, 85)
         .stroke();
 
-      // Customer address
-      doc
-        .fontSize(12)
-        .fillColor('#5A4747')
-        .font('Helvetica-Bold')
-        .text('Rechnungsadresse:', 50, 165);
-
-      doc.font('Helvetica'); // Reset font
-
+      // Customer address - kompakter
       doc
         .fontSize(10)
-        .fillColor('#333')
-        .text(`${order.customer.firstName} ${order.customer.lastName}`, 50, 185)
-        .text(`${order.customer.street} ${order.customer.houseNumber}`, 50, 200)
-        .text(`${order.customer.zip} ${order.customer.city}`, 50, 215)
-        .text(order.customer.country || 'Deutschland', 50, 230);
+        .fillColor('#5A4747')
+        .font('Helvetica-Bold')
+        .text('Rechnungsadresse:', 50, 95);
 
-      // Order items table header
-      const tableTop = 270;
+      doc
+        .fontSize(9)
+        .fillColor('#333')
+        .font('Helvetica')
+        .text(`${order.customer.firstName} ${order.customer.lastName}`, 50, 110)
+        .text(`${order.customer.street} ${order.customer.houseNumber}, ${order.customer.zip} ${order.customer.city}`, 50, 123);
+
+      // Order items table header - höher positioniert
+      const tableTop = 150;
       doc
         .fontSize(10)
         .fillColor('#5A4747')
@@ -146,24 +137,24 @@ export async function generateInvoice(order: IOrder): Promise<string> {
         .lineTo(545, tableTop + 15)
         .stroke();
 
-      // Order items
-      let yPosition = tableTop + 30;
+      // Order items - kompaktere Zeilenabstände
+      let yPosition = tableTop + 25;
       order.items.forEach((item) => {
         const itemTotal = item.price * item.quantity;
 
         doc
-          .fontSize(10)
+          .fontSize(9)
           .fillColor('#333')
           .text(item.name, 50, yPosition, { width: 260 })
           .text(item.quantity.toString(), 320, yPosition, { width: 60, align: 'center' })
           .text(`${item.price.toFixed(2)} EUR`, 380, yPosition, { width: 70, align: 'right' })
           .text(`${itemTotal.toFixed(2)} EUR`, 460, yPosition, { width: 85, align: 'right' });
 
-        yPosition += 20;
+        yPosition += 18;
       });
 
-      // Totals section
-      yPosition += 20;
+      // Totals section - kompakter
+      yPosition += 15;
       doc
         .strokeColor('#ddd')
         .lineWidth(1)
@@ -171,72 +162,73 @@ export async function generateInvoice(order: IOrder): Promise<string> {
         .lineTo(545, yPosition)
         .stroke();
 
-      yPosition += 15;
+      yPosition += 12;
 
       // Subtotal
       doc
-        .fontSize(10)
+        .fontSize(9)
         .fillColor('#666')
         .text('Zwischensumme:', 350, yPosition)
         .text(`${order.subtotal.toFixed(2)} EUR`, 460, yPosition, { width: 85, align: 'right' });
 
-      yPosition += 20;
+      yPosition += 15;
 
       // Shipping
       if (order.shipping > 0) {
         doc
           .text('Versandkosten:', 350, yPosition)
           .text(`${order.shipping.toFixed(2)} EUR`, 460, yPosition, { width: 85, align: 'right' });
-        yPosition += 20;
+        yPosition += 15;
       }
 
       // Total
       doc
-        .fontSize(12)
+        .fontSize(11)
         .fillColor('#5A4747')
+        .font('Helvetica-Bold')
         .text('Gesamtbetrag:', 350, yPosition)
         .text(`${order.total.toFixed(2)} EUR`, 460, yPosition, { width: 85, align: 'right' });
 
-      // Tax note
-      yPosition += 40;
+      // Tax note - kompakter
+      yPosition += 25;
       doc
-        .fontSize(9)
+        .fontSize(8)
         .fillColor('#888')
+        .font('Helvetica')
         .text('Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).', 50, yPosition);
 
-      // Payment info
-      yPosition += 30;
-      doc
-        .fontSize(10)
-        .fillColor('#5A4747')
-        .text('Zahlungsinformationen:', 50, yPosition);
-
-      yPosition += 15;
+      // Payment info - kompakter
+      yPosition += 20;
       doc
         .fontSize(9)
-        .fillColor('#333');
+        .fillColor('#5A4747')
+        .font('Helvetica-Bold')
+        .text('Zahlungsinformationen:', 50, yPosition);
+
+      yPosition += 12;
+      doc
+        .fontSize(8)
+        .fillColor('#333')
+        .font('Helvetica');
 
       if (order.paymentMethod === 'paypal') {
         doc.text('Zahlung erfolgt via PayPal.', 50, yPosition);
       } else if (order.paymentMethod === 'cash_on_pickup') {
         doc
-          .text('Barzahlung bei Abholung:', 50, yPosition)
-          .text('Henkes Stoffzauber, Rheinstraße 40, 47495 Rheinberg', 50, yPosition + 15)
-          .text('Telefon: 015565 612722', 50, yPosition + 30);
+          .text('Barzahlung bei Abholung: Rheinstraße 40, 47495 Rheinberg, Tel: 015565 612722', 50, yPosition);
       } else if (order.paymentMethod === 'invoice' || order.paymentMethod === 'prepayment') {
         const paymentText = order.paymentMethod === 'invoice'
-          ? 'Bitte überweisen Sie den Betrag innerhalb von 14 Tagen auf folgendes Konto:'
-          : 'Bitte überweisen Sie den Betrag vor Versand auf folgendes Konto:';
+          ? 'Bitte überweisen Sie innerhalb von 14 Tagen:'
+          : 'Bitte überweisen Sie vor Versand:';
 
+        // Bankdaten kompakt links, QR-Code rechts
         doc
           .text(paymentText, 50, yPosition)
-          .text('Kontoinhaber: Henkes Stoffzauber', 50, yPosition + 15)
-          .text('Bank: Sparkasse am Niederrhein', 50, yPosition + 30)
-          .text('IBAN: DE21 3545 0000 1201 2022 96', 50, yPosition + 45)
-          .text('BIC: WELADED1MOR', 50, yPosition + 60)
-          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 75);
+          .text('Henkes Stoffzauber  •  Sparkasse am Niederrhein', 50, yPosition + 12)
+          .text('IBAN: DE21 3545 0000 1201 2022 96  •  BIC: WELADED1MOR', 50, yPosition + 24)
+          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 36);
 
-        // Add QR Code for payment
+        // Add QR Code for payment - kleiner
         try {
           const qrBuffer = await generatePaymentQR(
             'DE21354500001201202296',
@@ -245,11 +237,11 @@ export async function generateInvoice(order: IOrder): Promise<string> {
             order.total,
             order.orderNumber
           );
-          doc.image(qrBuffer, 350, yPosition, { width: 150 });
+          doc.image(qrBuffer, 400, yPosition - 5, { width: 120 });
           doc
-            .fontSize(8)
+            .fontSize(7)
             .fillColor('#888')
-            .text('QR-Code zum Bezahlen scannen', 350, yPosition + 155, { width: 150, align: 'center' });
+            .text('QR zum Bezahlen', 400, yPosition + 120, { width: 120, align: 'center' });
         } catch (qrError) {
           logger.error('QR Code generation error:', qrError);
         }
