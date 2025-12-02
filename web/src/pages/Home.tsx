@@ -44,6 +44,11 @@ export function Home() {
             src="/api/uploads/1764276141636-banner.jpg"
             alt="Henkes Stoffzauber Banner"
             className="w-full h-full object-cover"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            width="1920"
+            height="600"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary-100/90 via-primary-50/85 to-secondary-100/90"></div>
         </div>
