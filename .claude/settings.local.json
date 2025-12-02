@@ -11,7 +11,15 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(findstr:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(ssh root@81.7.11.191 \"cat /etc/nginx/sites-available/henkes-stoffzauber.de | grep -A 15 ''location /api/uploads''\")",
+      "Bash(ssh root@81.7.11.191 \"cat /etc/nginx/sites-available/henkes-stoffzauber.de\")",
+      "Bash(ssh root@81.7.11.191 \"cat /etc/nginx/sites-available/henkes-stoffzauber.de | head -60\")",
+      "Bash(ssh root@81.7.11.191 \"curl -I https://henkes-stoffzauber.de/api/uploads/1764276141636-banner.jpg 2>&1 | head -20\")",
+      "Bash(ssh:*)",
+      "Bash(timeout 10 bash -c 'while ! ssh root@81.7.11.191 \"\"pm2 pid api\"\" 2>&1 | grep -q \"\"[0-9]\"\"; do sleep 1; done; echo \"\"API gestartet\"\"')",
+      "Bash(timeout 10 bash -c 'sleep 3 && ssh root@81.7.11.191 \"\"pm2 status henkes-api\"\"')",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
