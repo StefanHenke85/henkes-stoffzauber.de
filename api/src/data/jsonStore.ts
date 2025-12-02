@@ -61,6 +61,7 @@ export interface Order {
   invoicePath?: string;
   trackingNumber?: string;
   notes?: string;
+  customerNotes?: string;
   createdAt: string;
   updatedAt: string;
 }
