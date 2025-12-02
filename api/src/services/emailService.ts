@@ -227,7 +227,7 @@ export async function sendOrderNotification(order: IOrder, invoicePath?: string)
     : undefined;
 
   return sendEmail({
-    to: env.SHOP_EMAIL,
+    to: env.ADMIN_EMAIL,
     subject: `Neue Bestellung #${order.orderNumber}`,
     html,
     text: `

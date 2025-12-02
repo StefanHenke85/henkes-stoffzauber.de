@@ -228,7 +228,7 @@ export async function generateInvoice(order: IOrder): Promise<string> {
           .text('IBAN: DE21 3545 0000 1201 2022 96  •  BIC: WELADED1MOR', 50, yPosition + 24)
           .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 36);
 
-        // Add QR Code for payment - kleiner
+        // Add QR Code for payment - sehr kompakt, rechts neben Text
         try {
           const qrBuffer = await generatePaymentQR(
             'DE21354500001201202296',
@@ -237,24 +237,25 @@ export async function generateInvoice(order: IOrder): Promise<string> {
             order.total,
             order.orderNumber
           );
-          doc.image(qrBuffer, 400, yPosition - 5, { width: 120 });
+          doc.image(qrBuffer, 380, yPosition, { width: 100 });
           doc
             .fontSize(7)
             .fillColor('#888')
-            .text('QR zum Bezahlen', 400, yPosition + 120, { width: 120, align: 'center' });
+            .text('Zum Bezahlen scannen', 380, yPosition + 105, { width: 100, align: 'center' });
         } catch (qrError) {
           logger.error('QR Code generation error:', qrError);
         }
       }
 
-      // Footer
+      // Footer - direkt unter Zahlungsinfo, nicht am Seitenende
+      yPosition += 130; // Platz für QR-Code
       doc
         .fontSize(8)
         .fillColor('#888')
         .text(
           'Vielen Dank für Ihren Einkauf bei Henkes Stoffzauber!',
           50,
-          doc.page.height - 50,
+          yPosition,
           { align: 'center', width: 495 }
         );
 
