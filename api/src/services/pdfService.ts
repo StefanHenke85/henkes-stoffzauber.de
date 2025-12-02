@@ -61,61 +61,75 @@ export async function generateInvoice(order: IOrder): Promise<string> {
       const stream = fs.createWriteStream(invoicePath);
       doc.pipe(stream);
 
-      // Logo (if exists)
+      // Logo (if exists) - als rundes Bild
       if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 50, 40, { width: 80 });
+        try {
+          doc.image(logoPath, 50, 45, { width: 70, height: 70, fit: [70, 70] });
+        } catch (logoError) {
+          logger.warn('Logo konnte nicht geladen werden:', logoError);
+        }
       }
 
-      // Header
-      doc
-        .fontSize(24)
-        .fillColor('#5A4747')
-        .text("Henkes Stoffzauber", 140, 50);
-
-      doc
-        .fontSize(10)
-        .fillColor('#666')
-        .text('Rheinstraße 40', 140, 80)
-        .text('47495 Rheinberg', 140, 95)
-        .text('Telefon: 015565 612722', 140, 110)
-        .text('www.henkes-stoffzauber.de', 140, 125);
-
-      // Invoice title - Right aligned with proper width
+      // Header - Company Info
       doc
         .fontSize(20)
         .fillColor('#5A4747')
-        .text('RECHNUNG', 350, 50, { align: 'right', width: 195 });
+        .font('Helvetica-Bold')
+        .text("Henkes Stoffzauber", 130, 50);
 
       doc
-        .fontSize(10)
+        .fontSize(9)
         .fillColor('#666')
-        .text(`Nr: ${order.orderNumber}`, 350, 80, { align: 'right', width: 195 })
-        .text(`Datum: ${new Date(order.createdAt || Date.now()).toLocaleDateString('de-DE')}`, 350, 95, { align: 'right', width: 195 });
+        .font('Helvetica')
+        .text('Rheinstraße 40  •  47495 Rheinberg', 130, 75)
+        .text('Tel: 015565 612722  •  www.henkes-stoffzauber.de', 130, 88);
 
-      // Horizontal line
+      // Invoice title - Right aligned (keine Überlappung!)
+      doc
+        .fontSize(18)
+        .fillColor('#5A4747')
+        .font('Helvetica-Bold')
+        .text('RECHNUNG', 400, 50, { align: 'right', width: 145 });
+
+      // Rechnungsnummer und Datum untereinander
+      doc
+        .fontSize(9)
+        .fillColor('#666')
+        .font('Helvetica')
+        .text(`Rechnungsnr.:`, 400, 75, { align: 'right', width: 145 })
+        .font('Helvetica-Bold')
+        .text(`${order.orderNumber}`, 400, 87, { align: 'right', width: 145 })
+        .font('Helvetica')
+        .text(`Datum:`, 400, 103, { align: 'right', width: 145 })
+        .text(`${new Date(order.createdAt || Date.now()).toLocaleDateString('de-DE')}`, 400, 115, { align: 'right', width: 145 });
+
+      // Horizontal line (weiter unten wegen höherem Header)
       doc
         .strokeColor('#F2B2B4')
         .lineWidth(2)
-        .moveTo(50, 160)
-        .lineTo(545, 160)
+        .moveTo(50, 145)
+        .lineTo(545, 145)
         .stroke();
 
       // Customer address
       doc
         .fontSize(12)
         .fillColor('#5A4747')
-        .text('Rechnungsadresse:', 50, 180);
+        .font('Helvetica-Bold')
+        .text('Rechnungsadresse:', 50, 165);
+
+      doc.font('Helvetica'); // Reset font
 
       doc
         .fontSize(10)
         .fillColor('#333')
-        .text(`${order.customer.firstName} ${order.customer.lastName}`, 50, 200)
-        .text(`${order.customer.street} ${order.customer.houseNumber}`, 50, 215)
-        .text(`${order.customer.zip} ${order.customer.city}`, 50, 230)
-        .text(order.customer.country || 'Deutschland', 50, 245);
+        .text(`${order.customer.firstName} ${order.customer.lastName}`, 50, 185)
+        .text(`${order.customer.street} ${order.customer.houseNumber}`, 50, 200)
+        .text(`${order.customer.zip} ${order.customer.city}`, 50, 215)
+        .text(order.customer.country || 'Deutschland', 50, 230);
 
       // Order items table header
-      const tableTop = 290;
+      const tableTop = 270;
       doc
         .fontSize(10)
         .fillColor('#5A4747')

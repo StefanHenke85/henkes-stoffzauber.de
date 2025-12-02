@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { CartProvider } from '@/contexts/CartContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
-import { WhatsAppChat } from '@/components/WhatsAppChat';
+import { TawkToChat } from '@/components/TawkToChat';
 
 // Pages
 import { Home } from '@/pages/Home';
@@ -75,8 +75,8 @@ function App() {
               }}
             />
 
-            {/* WhatsApp Chat Widget */}
-            <WhatsAppChat />
+            {/* Tawk.to Live Chat Widget */}
+            <TawkToChat />
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
