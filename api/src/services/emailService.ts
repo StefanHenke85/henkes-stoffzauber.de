@@ -11,6 +11,14 @@ const createTransporter = () => {
     secure: env.SMTP_PORT === 465,
   };
 
+  // For localhost SMTP, disable TLS/SSL verification
+  if (env.SMTP_HOST === 'localhost' || env.SMTP_HOST === '127.0.0.1') {
+    config.tls = {
+      rejectUnauthorized: false,
+    };
+    config.ignoreTLS = true; // Don't use TLS for localhost
+  }
+
   // Only add auth if credentials are provided (not needed for local SMTP)
   if (env.SMTP_USER && env.SMTP_PASS) {
     config.auth = {
