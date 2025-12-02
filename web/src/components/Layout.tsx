@@ -92,10 +92,12 @@ export function Layout({ children }: LayoutProps) {
 
             {/* Mobile Menu Button */}
             <button
+              type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               className="md:hidden p-2 text-white"
               aria-label={menuOpen ? 'Menü schließen' : 'Menü öffnen'}
               aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -103,7 +105,7 @@ export function Layout({ children }: LayoutProps) {
 
           {/* Mobile Navigation */}
           {menuOpen && (
-            <div className="md:hidden py-4 border-t border-white/20">
+            <div id="mobile-menu" className="md:hidden py-4 border-t border-white/20">
               <div className="flex flex-col gap-2">
                 {navLinks.map((link) => (
                   <Link

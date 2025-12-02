@@ -29,7 +29,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
         aria-label="Warenkorb"
-        aria-hidden={!isOpen}
+        aria-hidden={isOpen ? undefined : true}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
