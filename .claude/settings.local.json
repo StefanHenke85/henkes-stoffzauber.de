@@ -19,7 +19,9 @@
       "Bash(ssh:*)",
       "Bash(timeout 10 bash -c 'while ! ssh root@81.7.11.191 \"\"pm2 pid api\"\" 2>&1 | grep -q \"\"[0-9]\"\"; do sleep 1; done; echo \"\"API gestartet\"\"')",
       "Bash(timeout 10 bash -c 'sleep 3 && ssh root@81.7.11.191 \"\"pm2 status henkes-api\"\"')",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run generate-icons:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

@@ -12,6 +12,7 @@ import {
   X,
   Check,
   Palette,
+  Camera,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +22,7 @@ import {
   formatDate,
   cn,
 } from '@/utils/helpers';
+import { CameraCapture } from '@/components/CameraCapture';
 import type { Product, Order, Fabric } from '@/types';
 
 type Tab = 'products' | 'orders' | 'fabrics';
@@ -58,6 +60,7 @@ export function AdminDashboard() {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [showProductCamera, setShowProductCamera] = useState(false);
 
   // Fabric form state
   const [fabricFormData, setFabricFormData] = useState({
@@ -72,6 +75,7 @@ export function AdminDashboard() {
   });
   const [fabricImageFile, setFabricImageFile] = useState<File | null>(null);
   const [fabricFormLoading, setFabricFormLoading] = useState(false);
+  const [showFabricCamera, setShowFabricCamera] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -551,15 +555,31 @@ export function AdminDashboard() {
 
                       <div>
                         <label htmlFor="product-image" className="block text-sm font-medium mb-1">Bild</label>
-                        <input
-                          id="product-image"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            setImageFile(e.target.files?.[0] || null)
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            id="product-image"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              setImageFile(e.target.files?.[0] || null)
+                            }
+                            className="flex-1 px-4 py-2 border rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowProductCamera(true)}
+                            className="px-4 py-2 bg-secondary-400 text-neutral-800 rounded-lg hover:bg-secondary-500 transition-colors flex items-center gap-2"
+                            aria-label="Foto mit Kamera aufnehmen"
+                          >
+                            <Camera className="h-5 w-5" />
+                            <span className="hidden sm:inline">Kamera</span>
+                          </button>
+                        </div>
+                        {imageFile && (
+                          <p className="text-sm text-green-600 mt-1">
+                            Bild ausgewählt: {imageFile.name}
+                          </p>
+                        )}
                       </div>
 
                       <label className="flex items-center gap-2">
@@ -935,15 +955,31 @@ export function AdminDashboard() {
 
                       <div>
                         <label htmlFor="fabric-image" className="block text-sm font-medium mb-1">Bild</label>
-                        <input
-                          id="fabric-image"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            setFabricImageFile(e.target.files?.[0] || null)
-                          }
-                          className="w-full px-4 py-2 border rounded-lg"
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            id="fabric-image"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              setFabricImageFile(e.target.files?.[0] || null)
+                            }
+                            className="flex-1 px-4 py-2 border rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowFabricCamera(true)}
+                            className="px-4 py-2 bg-secondary-400 text-neutral-800 rounded-lg hover:bg-secondary-500 transition-colors flex items-center gap-2"
+                            aria-label="Foto mit Kamera aufnehmen"
+                          >
+                            <Camera className="h-5 w-5" />
+                            <span className="hidden sm:inline">Kamera</span>
+                          </button>
+                        </div>
+                        {fabricImageFile && (
+                          <p className="text-sm text-green-600 mt-1">
+                            Bild ausgewählt: {fabricImageFile.name}
+                          </p>
+                        )}
                       </div>
 
                       <label className="flex items-center gap-2">
@@ -1059,6 +1095,27 @@ export function AdminDashboard() {
           )}
         </main>
       </div>
+
+      {/* Camera Modals */}
+      {showProductCamera && (
+        <CameraCapture
+          onCapture={(file) => {
+            setImageFile(file);
+            setShowProductCamera(false);
+          }}
+          onCancel={() => setShowProductCamera(false)}
+        />
+      )}
+
+      {showFabricCamera && (
+        <CameraCapture
+          onCapture={(file) => {
+            setFabricImageFile(file);
+            setShowFabricCamera(false);
+          }}
+          onCancel={() => setShowFabricCamera(false)}
+        />
+      )}
     </>
   );
 }
