@@ -197,17 +197,17 @@ export async function generateInvoice(order: IOrder): Promise<string> {
         .font('Helvetica')
         .text('Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).', 50, yPosition);
 
-      // Payment info - kompakter
-      yPosition += 20;
+      // Payment info - luftiger mit besseren Abständen
+      yPosition += 25;
       doc
-        .fontSize(9)
+        .fontSize(10)
         .fillColor('#5A4747')
         .font('Helvetica-Bold')
         .text('Zahlungsinformationen:', 50, yPosition);
 
-      yPosition += 12;
+      yPosition += 18;
       doc
-        .fontSize(8)
+        .fontSize(9)
         .fillColor('#333')
         .font('Helvetica');
 
@@ -221,14 +221,18 @@ export async function generateInvoice(order: IOrder): Promise<string> {
           ? 'Bitte überweisen Sie innerhalb von 14 Tagen:'
           : 'Bitte überweisen Sie vor Versand:';
 
-        // Bankdaten kompakt links, QR-Code rechts
+        // Bankdaten links mit luftigen Abständen
+        const paymentInfoStart = yPosition;
         doc
           .text(paymentText, 50, yPosition)
-          .text('Henkes Stoffzauber  •  Sparkasse am Niederrhein', 50, yPosition + 12)
-          .text('IBAN: DE21 3545 0000 1201 2022 96  •  BIC: WELADED1MOR', 50, yPosition + 24)
-          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 36);
+          .fontSize(8)
+          .text('Kontoinhaber: Henkes Stoffzauber', 50, yPosition + 18)
+          .text('Bank: Sparkasse am Niederrhein', 50, yPosition + 32)
+          .text('IBAN: DE21 3545 0000 1201 2022 96', 50, yPosition + 46)
+          .text('BIC: WELADED1MOR', 50, yPosition + 60)
+          .text(`Verwendungszweck: ${order.orderNumber}`, 50, yPosition + 74);
 
-        // Add QR Code for payment - sehr kompakt, rechts neben Text
+        // QR-Code rechts auf gleicher Höhe wie "Bitte überweisen..."
         try {
           const qrBuffer = await generatePaymentQR(
             'DE21354500001201202296',
@@ -237,18 +241,18 @@ export async function generateInvoice(order: IOrder): Promise<string> {
             order.total,
             order.orderNumber
           );
-          doc.image(qrBuffer, 380, yPosition, { width: 100 });
+          doc.image(qrBuffer, 380, paymentInfoStart - 5, { width: 110 });
           doc
             .fontSize(7)
             .fillColor('#888')
-            .text('Zum Bezahlen scannen', 380, yPosition + 105, { width: 100, align: 'center' });
+            .text('Mit Banking-App scannen', 380, paymentInfoStart + 110, { width: 110, align: 'center' });
         } catch (qrError) {
           logger.error('QR Code generation error:', qrError);
         }
       }
 
-      // Footer - direkt unter Zahlungsinfo, nicht am Seitenende
-      yPosition += 130; // Platz für QR-Code
+      // Footer - direkt unter Zahlungsinfo
+      yPosition += 135;
       doc
         .fontSize(8)
         .fillColor('#888')
