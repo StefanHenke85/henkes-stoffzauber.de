@@ -412,7 +412,11 @@ export function AdminDashboard() {
                       <h3 className="text-xl font-semibold">
                         {editingProduct ? 'Produkt bearbeiten' : 'Neues Produkt'}
                       </h3>
-                      <button onClick={resetForm}>
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        aria-label="Formular schließen"
+                      >
                         <X className="h-6 w-6" />
                       </button>
                     </div>
@@ -810,7 +814,11 @@ export function AdminDashboard() {
                       <h3 className="text-xl font-semibold">
                         {editingFabric ? 'Stoff bearbeiten' : 'Neuer Stoff'}
                       </h3>
-                      <button onClick={resetFabricForm}>
+                      <button
+                        type="button"
+                        onClick={resetFabricForm}
+                        aria-label="Formular schließen"
+                      >
                         <X className="h-6 w-6" />
                       </button>
                     </div>
