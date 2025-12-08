@@ -62,7 +62,7 @@ export function Home() {
               </h1>
               <p className="text-lg md:text-xl text-neutral-800 mb-8 max-w-2xl drop-shadow-sm">
                 Entdecken Sie hochwertige Stoffe, kreative Ideen und liebevoll
-                gefertigte Produkte. Perfekt für jedes Nähprojekt!
+                gefertigte Produkte. 
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link
@@ -127,7 +127,7 @@ export function Home() {
                 Höchste Qualität
               </h3>
               <p className="text-neutral-600">
-                Nur die besten Stoffe für Ihre kreativen Projekte.
+                Nur die besten Stoffe für Ihre individuellen Produkte.
               </p>
             </div>
 

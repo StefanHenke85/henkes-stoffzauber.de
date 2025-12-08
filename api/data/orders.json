@@ -1,107 +1,36 @@
 [
   {
-    "id": "1764439674157",
-    "orderNumber": "HS-20251129-001",
-    "status": "new",
-    "paymentStatus": "pending",
-    "paymentMethod": "prepayment",
-    "items": [
-      {
-        "productId": "1764276141647",
-        "name": "VERSUCH",
-        "price": 1,
-        "quantity": 1
-      },
-      {
-        "productId": "1764093497227.8489",
-        "name": "Loop für Jungs",
-        "price": 15,
-        "quantity": 1
-      }
-    ],
-    "subtotal": 16,
-    "shipping": 0,
-    "total": 16,
-    "customer": {
-      "firstName": "Maik",
-      "lastName": "Downar",
-      "email": "maikmaltedownar@gmail.com",
-      "phone": "01778470506"
-    },
-    "shippingAddress": {
-      "street": "Am Geldermannshoif",
-      "houseNumber": "2",
-      "zip": "47443",
-      "city": "Moers",
-      "country": "Deutschland"
-    },
-    "createdAt": "2025-11-29T18:07:54.157Z",
-    "updatedAt": "2025-11-29T18:07:54.157Z"
-  },
-  {
-    "id": "1764442936739",
-    "orderNumber": "HS-20251129-002",
-    "status": "new",
-    "paymentStatus": "pending",
-    "paymentMethod": "prepayment",
-    "items": [
-      {
-        "productId": "1764093497227.8489",
-        "name": "Loop für Jungs",
-        "price": 15,
-        "quantity": 1
-      }
-    ],
-    "subtotal": 15,
-    "shipping": 0,
-    "total": 15,
     "customer": {
       "firstName": "Andrea",
       "lastName": "Henke",
-      "email": "a.henke@gmx.de",
-      "phone": "01780815"
-    },
-    "shippingAddress": {
+      "email": "andrea-henke91@gmx.de",
+      "phone": "",
       "street": "Rheinstraße",
       "houseNumber": "40",
       "zip": "47495",
       "city": "Rheinberg",
       "country": "Deutschland"
     },
-    "createdAt": "2025-11-29T19:02:16.739Z",
-    "updatedAt": "2025-11-29T19:02:16.739Z"
-  },
-  {
-    "id": "1764498555479",
-    "orderNumber": "HS-20251130-001",
-    "status": "new",
-    "paymentStatus": "pending",
-    "paymentMethod": "prepayment",
     "items": [
       {
-        "productId": "1764276141647",
-        "name": "VERSUCH",
-        "price": 1,
-        "quantity": 1
+        "productId": "1765125215477",
+        "name": "Stirnbänder",
+        "price": 7,
+        "quantity": 1,
+        "imageUrl": "/uploads/WhatsApp-Bild-2025-11-25-um-22-05-43-be31f295-1765125215115-147252465.jpg"
       }
     ],
-    "subtotal": 1,
-    "shipping": 0,
-    "total": 1,
-    "customer": {
-      "firstName": "stefan",
-      "lastName": "henke",
-      "email": "henke.stefan1985@gmail.com",
-      "phone": "01788715208"
-    },
-    "shippingAddress": {
-      "street": "Rheinstraße",
-      "houseNumber": "40",
-      "zip": "47495",
-      "city": "rheinberg",
-      "country": "Deutschland"
-    },
-    "createdAt": "2025-11-30T10:29:15.479Z",
-    "updatedAt": "2025-11-30T10:29:15.479Z"
+    "subtotal": 7,
+    "shipping": 4.99,
+    "total": 11.99,
+    "paymentMethod": "invoice",
+    "paymentStatus": "paid",
+    "orderStatus": "new",
+    "customerNotes": "Alles Tuti bei der Mutti",
+    "id": "1765129730053",
+    "orderNumber": "HS-251207-3V95",
+    "createdAt": "2025-12-07T17:48:50.053Z",
+    "updatedAt": "2025-12-07T17:52:00.182Z",
+    "invoicePath": "/var/www/henkes-stoffzauber.de/api/invoices/invoice-HS-251207-3V95.pdf"
   }
 ]

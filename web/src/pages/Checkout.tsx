@@ -12,7 +12,8 @@ export function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart, addItem, decreaseQuantity, removeItem } = useCart();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup'>('paypal');
+  // NEU: 'paypal' wurde entfernt, da es nicht funktioniert
+  const [paymentMethod, setPaymentMethod] = useState<'invoice' | 'prepayment' | 'cash_on_pickup'>('prepayment');
   const [customerNotes, setCustomerNotes] = useState('');
 
   const [address, setAddress] = useState<Customer>({
@@ -86,12 +87,12 @@ export function Checkout() {
         customerNotes: customerNotes.trim() || undefined,
       });
 
-      if (response.approvalUrl) {
-        // PayPal redirect
-        sessionStorage.setItem('pendingOrderId', response.order.id);
-        window.location.href = response.approvalUrl;
-        return;
-      }
+      // PayPal redirect (AUSKOMMENTIERT)
+      // if (response.approvalUrl) {
+      //   sessionStorage.setItem('pendingOrderId', response.order.id);
+      //   window.location.href = response.approvalUrl;
+      //   return;
+      // }
 
       // Non-PayPal success
       clearCart();
@@ -338,7 +339,7 @@ export function Checkout() {
 
                   <div className="space-y-3">
                     {[
-                      { value: 'paypal', label: 'PayPal', desc: 'Sichere Zahlung über PayPal' },
+                      // { value: 'paypal', label: 'PayPal', desc: 'Sichere Zahlung über PayPal' }, // AUSKOMMENTIERT
                       { value: 'cash_on_pickup', label: 'Barzahlung bei Abholung', desc: 'Bar bezahlen bei Abholung in Rheinberg' },
                       { value: 'invoice', label: 'Rechnung', desc: 'Zahlung innerhalb von 14 Tagen' },
                       { value: 'prepayment', label: 'Vorkasse', desc: 'Überweisung vor Versand' },

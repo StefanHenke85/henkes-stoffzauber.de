@@ -51,8 +51,7 @@ export function Stoffe() {
               Unsere Stoffe
             </h1>
             <p className="text-neutral-800 max-w-2xl mx-auto drop-shadow-sm">
-              Hochwertige Materialien für Ihre kreativen Nähprojekte. Jeder Stoff
-              wird sorgfältig ausgewählt.
+             Jeder Stoff wird sorgfältig ausgewählt.
             </p>
           </div>
         </div>
