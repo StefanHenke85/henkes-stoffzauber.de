@@ -144,10 +144,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
-  uploadImage.fields([
-    { name: 'imageFile', maxCount: 1 },
-    { name: 'maskFile', maxCount: 1 }
-  ]),
+  uploadImage.any(),
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
@@ -239,10 +236,7 @@ router.put(
   '/:id',
   authenticateToken,
   requireAdmin,
-  uploadImage.fields([
-    { name: 'imageFile', maxCount: 1 },
-    { name: 'maskFile', maxCount: 1 }
-  ]),
+  uploadImage.any(),
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
