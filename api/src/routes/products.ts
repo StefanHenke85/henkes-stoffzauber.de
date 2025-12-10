@@ -285,6 +285,18 @@ router.put(
       if (req.body.productScale !== undefined) {
         updates.productScale = Number(req.body.productScale) || 1.0;
       }
+      if (req.body.sizeType !== undefined) {
+        updates.sizeType = req.body.sizeType;
+      }
+      if (req.body.availableSizes !== undefined) {
+        try {
+          updates.availableSizes = typeof req.body.availableSizes === 'string'
+            ? JSON.parse(req.body.availableSizes)
+            : req.body.availableSizes;
+        } catch {
+          updates.availableSizes = [];
+        }
+      }
 
       // Handle new image upload
       const imageFile = files?.imageFile?.[0];
