@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Sparkles, Heart, Truck } from 'lucide-react';
 import { productsApi } from '@/utils/api';
 import { ProductCard } from '@/components/ProductCard';
+import { ChristmasPopup } from '@/components/ChristmasPopup';
 import type { Product } from '@/types';
 
 export function Home() {
@@ -28,7 +29,7 @@ export function Home() {
   return (
     <>
       <Helmet>
-        <title>Henkes Stoffzauber - Handgemachte Stoffe & Nähkreationen aus Rheinberg</title>
+        <title>Henkes Stoffzauber - Nähkreationen aus Rheinberg</title>
         <meta
           name="description"
           content="Hochwertige handgefertigte Stoffprodukte aus Rheinberg. Mützen, Schals, Loops und individuelle Nähkreationen. Kostenloser Versand ab 50€."
@@ -41,7 +42,7 @@ export function Home() {
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/api/uploads/1764276141636-banner.jpg"
+            src="http://localhost:3001/uploads/1764276141636-banner.jpg"
             alt="Henkes Stoffzauber Banner"
             className="w-full h-full object-cover"
             loading="eager"
@@ -49,6 +50,9 @@ export function Home() {
             decoding="async"
             width="1920"
             height="600"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary-100/90 via-primary-50/85 to-secondary-100/90"></div>
         </div>
@@ -62,7 +66,7 @@ export function Home() {
               </h1>
               <p className="text-lg md:text-xl text-neutral-800 mb-8 max-w-2xl drop-shadow-sm">
                 Entdecken Sie hochwertige Stoffe, kreative Ideen und liebevoll
-                gefertigte Produkte. Perfekt für jedes Nähprojekt!
+                gefertigte Produkte.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link
@@ -127,7 +131,7 @@ export function Home() {
                 Höchste Qualität
               </h3>
               <p className="text-neutral-600">
-                Nur die besten Stoffe für Ihre kreativen Projekte.
+                Nur die besten Stoffe für ihre Produkte.
               </p>
             </div>
 
@@ -210,6 +214,9 @@ export function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Christmas Popup */}
+      <ChristmasPopup />
     </>
   );
 }

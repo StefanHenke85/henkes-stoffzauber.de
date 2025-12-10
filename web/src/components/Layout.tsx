@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { ScrollToTop } from '@/components/ScrollToTop';
 import { cn } from '@/utils/helpers';
 
 interface LayoutProps {
@@ -12,13 +12,13 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { itemCount } = useCart();
-  const { isAuthenticated } = useAuth();
   const location = useLocation();
 
   const navLinks = [
     { href: '/', label: 'Startseite' },
     { href: '/shop', label: 'Shop' },
     { href: '/stoffe', label: 'Stoffe' },
+    { href: '/gutscheine', label: 'Gutscheine' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -76,18 +76,8 @@ export function Layout({ children }: LayoutProps) {
                 )}
               </Link>
 
-              {/* Admin Link */}
-              <Link
-                to="/admin"
-                className={cn(
-                  'px-4 py-2 rounded-full font-semibold transition-all',
-                  'bg-primary-200 text-neutral-800 hover:bg-primary-100'
-                )}
-                aria-label="Admin-Bereich"
-              >
-                <User className="h-5 w-5 inline-block mr-1" />
-                {isAuthenticated ? 'Dashboard' : 'Login'}
-              </Link>
+            
+              
             </div>
 
             {/* Mobile Menu Button */}
@@ -129,13 +119,7 @@ export function Layout({ children }: LayoutProps) {
                   <ShoppingCart className="h-5 w-5" />
                   Warenkorb ({itemCount})
                 </Link>
-                <Link
-                  to="/admin"
-                  onClick={() => setMenuOpen(false)}
-                  className="px-4 py-3 rounded-lg font-semibold bg-primary-200 text-neutral-800"
-                >
-                  {isAuthenticated ? 'Dashboard' : 'Admin Login'}
-                </Link>
+              
               </div>
             </div>
           )}
@@ -153,7 +137,7 @@ export function Layout({ children }: LayoutProps) {
             <div>
               <h3 className="font-bold text-lg mb-3">Henkes Stoffzauber</h3>
               <p className="text-white/80 text-sm">
-                Handgemachte Stoffe und Nähkreationen mit Liebe gefertigt.
+                Handgemachte Nähkreationen mit Liebe gefertigt.
               </p>
             </div>
 
@@ -198,6 +182,9 @@ export function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 }

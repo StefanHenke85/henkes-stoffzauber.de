@@ -50,7 +50,7 @@ export function Datenschutz() {
                     <p>Rheinstraße 40</p>
                     <p>47495 Rheinberg</p>
                     <p className="mt-3">
-                      <span className="font-medium">Telefon:</span> 015565 612722
+                      
                     </p>
                     <p>
                       <span className="font-medium">E-Mail:</span>{' '}
@@ -292,7 +292,7 @@ export function Datenschutz() {
                       info@henkes-stoffzauber.de
                     </a>
                   </p>
-                  <p>Telefon: 015565 612722</p>
+                  
                 </div>
               </section>
 

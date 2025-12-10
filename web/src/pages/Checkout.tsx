@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ShoppingBag, Truck, CreditCard, ArrowLeft, Loader2, Plus, Minus, Trash2 } from 'lucide-react';
+import { ShoppingBag, Truck, CreditCard, ArrowLeft, Loader2, Plus, Minus, Trash2, Tag, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCart } from '@/contexts/CartContext';
-import { ordersApi } from '@/utils/api';
+import { ordersApi, vouchersApi } from '@/utils/api';
 import { formatCurrency, isValidEmail, isValidZip, cn } from '@/utils/helpers';
 import type { Customer } from '@/types';
 
@@ -12,7 +12,11 @@ export function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart, addItem, decreaseQuantity, removeItem } = useCart();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup'>('paypal');
+  
+  // 1. ANPASSUNG: Standard-Zahlungsmethode auf 'invoice' setzen und 'paypal' entfernen
+  // const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'invoice' | 'prepayment' | 'cash_on_pickup'>('paypal');
+  const [paymentMethod, setPaymentMethod] = useState<'invoice' | 'prepayment' | 'cash_on_pickup'>('invoice');
+
   const [customerNotes, setCustomerNotes] = useState('');
 
   const [address, setAddress] = useState<Customer>({
@@ -29,8 +33,24 @@ export function Checkout() {
 
   const [errors, setErrors] = useState<Partial<Record<keyof Customer, string>>>({});
 
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; value: number; isPercentage?: boolean } | null>(null);
+  const [voucherLoading, setVoucherLoading] = useState(false);
+
   const shipping = total >= 50 ? 0 : 4.99;
-  const grandTotal = total + shipping;
+  const discount = appliedVoucher
+    ? (appliedVoucher.isPercentage ? (total * appliedVoucher.value / 100) : appliedVoucher.value)
+    : 0;
+  const grandTotal = Math.max(0, total + shipping - discount);
+
+  // Debug logging
+  if (appliedVoucher) {
+    console.log('🎟️ Applied Voucher:', appliedVoucher);
+    console.log('💰 Total:', total);
+    console.log('📊 Is Percentage?', appliedVoucher.isPercentage);
+    console.log('💵 Discount Amount:', discount);
+  }
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof Customer, string>> = {};
@@ -63,6 +83,34 @@ export function Checkout() {
     }
   };
 
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      toast.error('Bitte Gutscheincode eingeben');
+      return;
+    }
+
+    setVoucherLoading(true);
+    try {
+      const voucher = await vouchersApi.validate(voucherCode.trim());
+      console.log('🔍 Voucher from API:', voucher);
+      setAppliedVoucher(voucher);
+      const discountText = voucher.isPercentage
+        ? `${voucher.value}% Rabatt`
+        : `${formatCurrency(voucher.value)} Rabatt`;
+      toast.success(`Gutschein "${voucher.code}" erfolgreich eingelöst! ${discountText}`);
+      setVoucherCode('');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Ungültiger Gutscheincode');
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    toast.success('Gutschein entfernt');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -86,12 +134,15 @@ export function Checkout() {
         customerNotes: customerNotes.trim() || undefined,
       });
 
+      // 3. ANPASSUNG: PayPal-Weiterleitungslogik auskommentiert
+      /*
       if (response.approvalUrl) {
         // PayPal redirect
         sessionStorage.setItem('pendingOrderId', response.order.id);
         window.location.href = response.approvalUrl;
         return;
       }
+      */
 
       // Non-PayPal success
       clearCart();
@@ -333,14 +384,15 @@ export function Checkout() {
                 <div className="bg-white rounded-xl p-6 shadow-sm">
                   <h2 className="text-xl font-semibold text-neutral-800 mb-4 flex items-center gap-2">
                     <CreditCard className="h-5 w-5 text-primary-400" />
-                    Zahlungsart
+                    Zahlungsart („Wir bitten um Beachtung, dass bei Versand, die Fertigung erst nach Begleichung der Rechnung aufgenommen wird.“ ) 
                   </h2>
 
                   <div className="space-y-3">
                     {[
-                      { value: 'paypal', label: 'PayPal', desc: 'Sichere Zahlung über PayPal' },
+                      // 2. ANPASSUNG: PayPal-Option auskommentiert
+                      // { value: 'paypal', label: 'PayPal', desc: 'Sichere Zahlung über PayPal' },
                       { value: 'cash_on_pickup', label: 'Barzahlung bei Abholung', desc: 'Bar bezahlen bei Abholung in Rheinberg' },
-                      { value: 'invoice', label: 'Rechnung', desc: 'Zahlung innerhalb von 14 Tagen' },
+                      { value: 'invoice', label: 'Rechnung', desc: 'Zahlung innerhalb von 14 Tagen ' },
                       { value: 'prepayment', label: 'Vorkasse', desc: 'Überweisung vor Versand' },
                     ].map((method) => (
                       <label
@@ -410,9 +462,10 @@ export function Checkout() {
                         <p className="text-sm text-neutral-500 mb-2">
                           {formatCurrency(item.price)} pro Stück
                         </p>
-                        {item.selectedFabrics && item.selectedFabrics.length > 0 && (
+                        {(item.selectedOuterFabric || item.selectedInnerFabric) && (
                           <p className="text-xs text-neutral-600 mb-2">
-                            Stoffe: {item.selectedFabrics.map(f => f.fabricName).join(', ')}
+                            {item.selectedOuterFabric && `Außenstoff: ${item.selectedOuterFabric.fabricName}`}
+                            {item.selectedInnerFabric && ` | Innenstoff: ${item.selectedInnerFabric.fabricName}`}
                           </p>
                         )}
                         <div className="flex items-center gap-2">
@@ -452,6 +505,54 @@ export function Checkout() {
                   ))}
                 </ul>
 
+                {/* Voucher Input */}
+                <div className="border-t border-gray-200 pt-4 mb-4">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Gutscheincode
+                  </label>
+                  {appliedVoucher ? (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-700">{appliedVoucher.code}</span>
+                        <span className="text-sm text-green-600">-{formatCurrency(appliedVoucher.value)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveVoucher}
+                        className="text-green-600 hover:text-green-800 transition-colors"
+                        aria-label="Gutschein entfernen"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={voucherCode}
+                        onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleApplyVoucher())}
+                        placeholder="z.B. HS-XXXXX"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 transition-all text-sm"
+                        disabled={voucherLoading}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyVoucher}
+                        disabled={voucherLoading || !voucherCode.trim()}
+                        className="px-4 py-2 bg-primary-400 text-white rounded-lg font-medium hover:bg-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                      >
+                        {voucherLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Einlösen'
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="border-t border-gray-200 pt-4 space-y-2">
                   <div className="flex justify-between text-neutral-600">
                     <span>Zwischensumme</span>
@@ -461,6 +562,12 @@ export function Checkout() {
                     <span>Versand</span>
                     <span>{shipping === 0 ? 'Kostenlos' : formatCurrency(shipping)}</span>
                   </div>
+                  {appliedVoucher && (
+                    <div className="flex justify-between text-green-600 font-medium">
+                      <span>Gutschein</span>
+                      <span>-{formatCurrency(discount)}</span>
+                    </div>
+                  )}
                   {shipping > 0 && (
                     <p className="text-sm text-green-600">
                       Noch {formatCurrency(50 - total)} bis zum kostenlosen Versand!

@@ -1,107 +1,68 @@
 [
   {
-    "id": "1764439674157",
-    "orderNumber": "HS-20251129-001",
-    "status": "new",
-    "paymentStatus": "pending",
-    "paymentMethod": "prepayment",
-    "items": [
-      {
-        "productId": "1764276141647",
-        "name": "VERSUCH",
-        "price": 1,
-        "quantity": 1
-      },
-      {
-        "productId": "1764093497227.8489",
-        "name": "Loop für Jungs",
-        "price": 15,
-        "quantity": 1
-      }
-    ],
-    "subtotal": 16,
-    "shipping": 0,
-    "total": 16,
     "customer": {
-      "firstName": "Maik",
-      "lastName": "Downar",
-      "email": "maikmaltedownar@gmail.com",
-      "phone": "01778470506"
-    },
-    "shippingAddress": {
-      "street": "Am Geldermannshoif",
-      "houseNumber": "2",
-      "zip": "47443",
-      "city": "Moers",
-      "country": "Deutschland"
-    },
-    "createdAt": "2025-11-29T18:07:54.157Z",
-    "updatedAt": "2025-11-29T18:07:54.157Z"
-  },
-  {
-    "id": "1764442936739",
-    "orderNumber": "HS-20251129-002",
-    "status": "new",
-    "paymentStatus": "pending",
-    "paymentMethod": "prepayment",
-    "items": [
-      {
-        "productId": "1764093497227.8489",
-        "name": "Loop für Jungs",
-        "price": 15,
-        "quantity": 1
-      }
-    ],
-    "subtotal": 15,
-    "shipping": 0,
-    "total": 15,
-    "customer": {
-      "firstName": "Andrea",
+      "firstName": "Stefan",
       "lastName": "Henke",
-      "email": "a.henke@gmx.de",
-      "phone": "01780815"
-    },
-    "shippingAddress": {
+      "email": "henke.stefan1985@gmail.com",
+      "phone": "",
       "street": "Rheinstraße",
       "houseNumber": "40",
       "zip": "47495",
       "city": "Rheinberg",
       "country": "Deutschland"
     },
-    "createdAt": "2025-11-29T19:02:16.739Z",
-    "updatedAt": "2025-11-29T19:02:16.739Z"
-  },
-  {
-    "id": "1764498555479",
-    "orderNumber": "HS-20251130-001",
-    "status": "new",
-    "paymentStatus": "pending",
-    "paymentMethod": "prepayment",
     "items": [
       {
-        "productId": "1764276141647",
-        "name": "VERSUCH",
-        "price": 1,
-        "quantity": 1
+        "productId": "voucher-5",
+        "name": "Gutschein 5,00 €",
+        "price": 5,
+        "quantity": 1,
+        "imageUrl": "/voucher-placeholder.jpg"
       }
     ],
-    "subtotal": 1,
+    "subtotal": 5,
     "shipping": 0,
-    "total": 1,
+    "total": 5,
+    "paymentMethod": "cash_on_pickup",
+    "paymentStatus": "paid",
+    "orderStatus": "new",
+    "id": "1765293244805",
+    "orderNumber": "HS-251209-NSTJ",
+    "createdAt": "2025-12-09T15:14:04.805Z",
+    "updatedAt": "2025-12-09T15:14:24.356Z",
+    "invoicePath": "C:\\Users\\Stefan\\Desktop\\henkes-stoffzauber\\api\\invoices\\invoice-HS-251209-NSTJ.pdf"
+  },
+  {
     "customer": {
-      "firstName": "stefan",
-      "lastName": "henke",
-      "email": "henke.stefan1985@gmail.com",
-      "phone": "01788715208"
-    },
-    "shippingAddress": {
-      "street": "Rheinstraße",
-      "houseNumber": "40",
-      "zip": "47495",
-      "city": "rheinberg",
+      "firstName": "Chris",
+      "lastName": "Breuning",
+      "email": "chris.beart23@gmail.com",
+      "phone": "",
+      "street": "Diemendorf",
+      "houseNumber": "3c",
+      "zip": "82327",
+      "city": "Diemendorf",
       "country": "Deutschland"
     },
-    "createdAt": "2025-11-30T10:29:15.479Z",
-    "updatedAt": "2025-11-30T10:29:15.479Z"
+    "items": [
+      {
+        "productId": "voucher-5",
+        "name": "Gutschein 5,00 €",
+        "price": 5,
+        "quantity": 1,
+        "imageUrl": "/voucher-placeholder.jpg"
+      }
+    ],
+    "subtotal": 5,
+    "shipping": 0,
+    "total": 5,
+    "paymentMethod": "cash_on_pickup",
+    "paymentStatus": "paid",
+    "orderStatus": "shipped",
+    "id": "1765319116369",
+    "orderNumber": "HS-251209-XK1X",
+    "createdAt": "2025-12-09T22:25:16.369Z",
+    "updatedAt": "2025-12-09T22:28:23.815Z",
+    "invoicePath": "C:\\Users\\Stefan\\Desktop\\henkes-stoffzauber\\api\\invoices\\invoice-HS-251209-XK1X.pdf"
   }
 ]

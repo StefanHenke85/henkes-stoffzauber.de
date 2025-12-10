@@ -1,0 +1,26 @@
+[
+  {
+    "id": "xmas2025-voucher",
+    "code": "XMAS2025",
+    "value": 5,
+    "isPercentage": true,
+    "isUsed": false,
+    "createdAt": "2025-12-08T10:45:00.000Z"
+  },
+  {
+    "id": "6a2705ae05cdd409499d8d00f242028f",
+    "code": "HS-X16D1F3I",
+    "value": 5,
+    "isUsed": false,
+    "orderId": "1765293244805",
+    "createdAt": "2025-12-09T15:14:21.730Z"
+  },
+  {
+    "id": "af14733d8b3adadcba19e38c35d542a5",
+    "code": "HS-TQLOC5KL",
+    "value": 5,
+    "isUsed": false,
+    "orderId": "1765319116369",
+    "createdAt": "2025-12-09T22:25:39.229Z"
+  }
+]

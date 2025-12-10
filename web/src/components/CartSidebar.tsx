@@ -82,9 +82,10 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       {formatCurrency(item.price)}
                     </p>
 
-                    {item.selectedFabrics && item.selectedFabrics.length > 0 && (
+                    {(item.selectedOuterFabric || item.selectedInnerFabric) && (
                       <p className="text-xs text-neutral-600 mt-1">
-                        Stoffe: {item.selectedFabrics.map(f => f.fabricName).join(', ')}
+                        {item.selectedOuterFabric && `Außenstoff: ${item.selectedOuterFabric.fabricName}`}
+                        {item.selectedInnerFabric && ` | Innenstoff: ${item.selectedInnerFabric.fabricName}`}
                       </p>
                     )}
 

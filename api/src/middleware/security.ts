@@ -49,7 +49,7 @@ export const corsMiddleware = cors({
 // Rate limiting for general API
 export const generalRateLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
-  max: env.RATE_LIMIT_MAX_REQUESTS,
+  max: isProd ? env.RATE_LIMIT_MAX_REQUESTS : 1000, // Much higher limit in development
   message: {
     success: false,
     error: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.',
@@ -57,8 +57,10 @@ export const generalRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Skip rate limiting for health checks
-    return req.path === '/health';
+    // Skip rate limiting for health checks and in development mode for static files
+    if (req.path === '/health') return true;
+    if (!isProd && req.path.startsWith('/api/uploads/')) return true;
+    return false;
   },
 });
 

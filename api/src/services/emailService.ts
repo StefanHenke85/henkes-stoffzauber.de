@@ -55,10 +55,16 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
   }
 }
 
+interface VoucherCode {
+  id: string;
+  code: string;
+  value: number;
+}
+
 /**
  * Send order confirmation to customer
  */
-export async function sendOrderConfirmation(order: IOrder, invoicePath?: string): Promise<boolean> {
+export async function sendOrderConfirmation(order: IOrder, invoicePath?: string, voucherCodes?: VoucherCode[]): Promise<boolean> {
   const itemsList = order.items
     .map((item) => `- ${item.name} x ${item.quantity}: ${item.price.toFixed(2)} EUR`)
     .join('\n');
@@ -115,6 +121,21 @@ export async function sendOrderConfirmation(order: IOrder, invoicePath?: string)
               ${order.customer.country || 'Deutschland'}
             </p>
           </div>
+
+          ${voucherCodes && voucherCodes.length > 0 ? `
+          <div class="order-details" style="background: #FFF9E6; border: 2px solid #F2B2B4;">
+            <h3 style="color: #F2B2B4;">🎁 Ihre Gutschein-Codes</h3>
+            <p>Vielen Dank für Ihren Gutschein-Kauf! Hier sind Ihre Codes:</p>
+            <ul style="font-family: 'Courier New', monospace; font-size: 1.1em; font-weight: bold; color: #5A4747;">
+              ${voucherCodes.map(v => `
+                <li style="margin: 10px 0; padding: 10px; background: white; border-radius: 4px;">
+                  <span style="color: #F2B2B4;">${v.code}</span> - ${v.value.toFixed(2)} EUR
+                </li>
+              `).join('')}
+            </ul>
+            <p><small>Diese Codes sind 3 Jahre ab Kaufdatum gültig und können beim Checkout eingelöst werden.</small></p>
+          </div>
+          ` : ''}
 
           ${order.paymentMethod === 'cash_on_pickup' ? `
           <div class="order-details">

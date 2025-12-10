@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Info, Loader2, Palette } from 'lucide-react';
+import { Info, Loader2, Palette, Search, Filter } from 'lucide-react';
 import { fabricsApi } from '@/utils/api';
 import type { Fabric } from '@/types';
 
@@ -8,6 +8,8 @@ export function Stoffe() {
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFabric, setSelectedFabric] = useState<Fabric | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedType, setSelectedType] = useState<string>('all');
 
   useEffect(() => {
     loadFabrics();
@@ -23,6 +25,30 @@ export function Stoffe() {
       setLoading(false);
     }
   };
+
+  // Get unique fabric types for filter
+  const fabricTypes = useMemo(() => {
+    const types = new Set(fabrics.map(f => f.fabricType).filter(Boolean));
+    return ['all', ...Array.from(types)];
+  }, [fabrics]);
+
+  // Filter fabrics based on search and type
+  const filteredFabrics = useMemo(() => {
+    return fabrics.filter(fabric => {
+      // Search filter
+      const matchesSearch = searchTerm === '' ||
+        fabric.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fabric.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fabric.fabricType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fabric.color?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fabric.material?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Type filter
+      const matchesType = selectedType === 'all' || fabric.fabricType === selectedType;
+
+      return matchesSearch && matchesType;
+    });
+  }, [fabrics, searchTerm, selectedType]);
 
   return (
     <>
@@ -51,7 +77,7 @@ export function Stoffe() {
               Unsere Stoffe
             </h1>
             <p className="text-neutral-800 max-w-2xl mx-auto drop-shadow-sm">
-              Hochwertige Materialien für Ihre kreativen Nähprojekte. Jeder Stoff
+              Hochwertige Materialien. Jeder Stoff
               wird sorgfältig ausgewählt.
             </p>
           </div>
@@ -74,6 +100,49 @@ export function Stoffe() {
           </div>
         </div>
 
+        {/* Search and Filter */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Stoffe durchsuchen..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all"
+                />
+              </div>
+
+              {/* Filter */}
+              <div className="md:w-64">
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all appearance-none bg-white cursor-pointer"
+                    aria-label="Stoffart filtern"
+                  >
+                    {fabricTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type === 'all' ? 'Alle Stoffarten' : type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Results count */}
+            <div className="mt-4 text-sm text-neutral-500">
+              {filteredFabrics.length} {filteredFabrics.length === 1 ? 'Stoff' : 'Stoffe'} gefunden
+            </div>
+          </div>
+        </div>
+
         {/* Fabric Grid */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           {loading ? (
@@ -81,16 +150,16 @@ export function Stoffe() {
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary-400" />
               <p className="text-neutral-500 mt-4">Stoffe werden geladen...</p>
             </div>
-          ) : fabrics.length === 0 ? (
+          ) : filteredFabrics.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl">
               <Palette className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">
-                Derzeit sind keine Stoffe verfügbar.
+                {fabrics.length === 0 ? 'Derzeit sind keine Stoffe verfügbar.' : 'Keine Stoffe gefunden. Versuche eine andere Suche.'}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {fabrics.map((fabric) => (
+              {filteredFabrics.map((fabric) => (
                 <article
                   key={fabric.id}
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"

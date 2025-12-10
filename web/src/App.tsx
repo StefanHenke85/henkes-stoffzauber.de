@@ -7,6 +7,7 @@ import { CartProvider } from '@/contexts/CartContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { TawkToChat } from '@/components/TawkToChat';
+import { CookieConsent } from '@/components/CookieConsent';
 
 // Critical Pages (Not lazy loaded)
 import { Home } from '@/pages/Home';
@@ -15,6 +16,7 @@ import { Home } from '@/pages/Home';
 const Shop = lazy(() => import('@/pages/Shop').then(m => ({ default: m.Shop })));
 const ProductDetail = lazy(() => import('@/pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
 const Stoffe = lazy(() => import('@/pages/Stoffe').then(m => ({ default: m.Stoffe })));
+const VoucherShop = lazy(() => import('@/pages/VoucherShop').then(m => ({ default: m.VoucherShop })));
 const Checkout = lazy(() => import('@/pages/Checkout').then(m => ({ default: m.Checkout })));
 const CheckoutSuccess = lazy(() => import('@/pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })));
 const CheckoutCancel = lazy(() => import('@/pages/CheckoutCancel').then(m => ({ default: m.CheckoutCancel })));
@@ -45,6 +47,7 @@ function App() {
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/shop/:productId" element={<ProductDetail />} />
                   <Route path="/stoffe" element={<Stoffe />} />
+                  <Route path="/gutscheine" element={<VoucherShop />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/checkout/success" element={<CheckoutSuccess />} />
                   <Route path="/checkout/cancel" element={<CheckoutCancel />} />
@@ -92,6 +95,9 @@ function App() {
 
             {/* Tawk.to Live Chat Widget */}
             <TawkToChat />
+
+            {/* Cookie Consent Banner */}
+            <CookieConsent />
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>

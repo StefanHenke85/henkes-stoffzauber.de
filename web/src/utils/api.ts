@@ -184,4 +184,31 @@ export const fabricsApi = {
   },
 };
 
+// Vouchers API
+export const vouchersApi = {
+  validate: async (code: string): Promise<{ code: string; value: number; isPercentage?: boolean }> => {
+    const { data } = await api.post<ApiResponse<{ code: string; value: number; isPercentage?: boolean }>>('/vouchers/validate', { code });
+    return data.data!;
+  },
+
+  use: async (code: string, customerEmail: string): Promise<void> => {
+    await api.post('/vouchers/use', { code, customerEmail });
+  },
+
+  // Admin methods
+  getAll: async (): Promise<Array<{ id: string; code: string; value: number; isUsed: boolean; usedBy?: string; usedAt?: string; createdAt: string }>> => {
+    const { data } = await api.get('/vouchers');
+    return data.data || [];
+  },
+
+  create: async (value: number): Promise<{ id: string; code: string; value: number }> => {
+    const { data } = await api.post('/vouchers', { value });
+    return data.data!;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/vouchers/${id}`);
+  },
+};
+
 export default api;

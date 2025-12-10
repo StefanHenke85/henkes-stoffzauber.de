@@ -51,7 +51,7 @@ export const uploadImage = multer({
   fileFilter: imageFileFilter,
   limits: {
     fileSize: env.MAX_FILE_SIZE_MB * 1024 * 1024, // Convert MB to bytes
-    files: 1,
+    files: 2, // Allow 2 files (image + mask)
   },
 });
 

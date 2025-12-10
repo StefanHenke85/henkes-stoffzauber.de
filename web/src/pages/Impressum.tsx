@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 
 export function Impressum() {
   return (
@@ -42,15 +42,7 @@ export function Impressum() {
                   Kontakt
                 </h2>
                 <div className="space-y-3 text-neutral-700">
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-primary-500" />
-                    <a
-                      href="tel:+4915565612722"
-                      className="hover:text-primary-500 transition-colors"
-                    >
-                      015565 612722
-                    </a>
-                  </div>
+              
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-primary-500" />
                     <a

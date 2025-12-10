@@ -23,7 +23,18 @@
       "Bash(npm run generate-icons:*)",
       "Bash(npm run build:*)",
       "Bash(python -m json.tool:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 5 npx tsx:*)",
+      "Bash(timeout 10 npx tsx:*)",
+      "Bash(timeout 5 node:*)",
+      "Bash(npx tsx:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(cmd /c \"taskkill /PID 19684 /F\")",
+      "Bash(cmd /c \"taskkill /PID 93840 /F\")",
+      "Bash(rsync:*)",
+      "Bash(scp:*)"
     ],
     "deny": [],
     "ask": []

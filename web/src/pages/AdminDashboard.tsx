@@ -14,6 +14,7 @@ import {
   Palette,
   Camera,
   Download,
+  Tag,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,9 +25,11 @@ import {
   cn,
 } from '@/utils/helpers';
 import { CameraCapture } from '@/components/CameraCapture';
+import { AdminVouchers } from '@/components/AdminVouchers';
+import { FabricScalePreview } from '@/components/FabricScalePreview';
 import type { Product, Order, Fabric } from '@/types';
 
-type Tab = 'products' | 'orders' | 'fabrics';
+type Tab = 'products' | 'orders' | 'fabrics' | 'vouchers';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -58,10 +61,16 @@ export function AdminDashboard() {
     fabrics: '',
     availableFabrics: [] as string[],
     isFeatured: false,
+    sizeType: 'oneSize' as 'headCircumference' | 'clothing' | 'oneSize' | 'dimensions',
+    availableSizes: [] as string[],
+    fabricScale: 1.0,
+    productScale: 1.0,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [maskFile, setMaskFile] = useState<File | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [showProductCamera, setShowProductCamera] = useState(false);
+  const [previewFabricId, setPreviewFabricId] = useState<string | null>(null);
 
   // Fabric form state
   const [fabricFormData, setFabricFormData] = useState({
@@ -174,8 +183,13 @@ export function AdminDashboard() {
       fabrics: '',
       availableFabrics: [],
       isFeatured: false,
+      sizeType: 'oneSize',
+      availableSizes: [],
+      fabricScale: 1.0,
+      productScale: 1.0,
     });
     setImageFile(null);
+    setMaskFile(null);
     setEditingProduct(null);
     setShowProductForm(false);
   };
@@ -190,6 +204,10 @@ export function AdminDashboard() {
       fabrics: product.fabrics || '',
       availableFabrics: product.availableFabrics || [],
       isFeatured: product.isFeatured,
+      sizeType: product.sizeType || 'oneSize',
+      availableSizes: product.availableSizes || [],
+      fabricScale: product.fabricScale || 1.0,
+      productScale: 1.0,
     });
     setShowProductForm(true);
   };
@@ -207,9 +225,17 @@ export function AdminDashboard() {
       data.append('fabrics', formData.fabrics);
       data.append('availableFabrics', JSON.stringify(formData.availableFabrics));
       data.append('isFeatured', String(formData.isFeatured));
+      data.append('sizeType', formData.sizeType);
+      data.append('availableSizes', JSON.stringify(formData.availableSizes));
+      data.append('fabricScale', String(formData.fabricScale));
+      data.append('productScale', String(formData.productScale));
 
       if (imageFile) {
         data.append('imageFile', imageFile);
+      }
+
+      if (maskFile) {
+        data.append('maskFile', maskFile);
       }
 
       if (editingProduct) {
@@ -435,6 +461,18 @@ export function AdminDashboard() {
                 <Palette className="h-4 w-4" />
                 Stoffe ({fabrics.length})
               </button>
+              <button
+                onClick={() => setActiveTab('vouchers')}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+                  activeTab === 'vouchers'
+                    ? 'bg-primary-400 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                )}
+              >
+                <Tag className="h-4 w-4" />
+                Gutscheine
+              </button>
             </div>
           </div>
         </header>
@@ -602,6 +640,173 @@ export function AdminDashboard() {
                       </div>
 
                       <div>
+                        <label htmlFor="size-type" className="block text-sm font-medium mb-2">
+                          Größentyp
+                        </label>
+                        <select
+                          id="size-type"
+                          value={formData.sizeType}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              sizeType: e.target.value as any,
+                              availableSizes: [] // Reset sizes when type changes
+                            })
+                          }
+                          className="w-full px-4 py-2 border rounded-lg mb-3"
+                        >
+                          <option value="oneSize">Einheitsgröße (keine Größenauswahl)</option>
+                          <option value="headCircumference">Kopfumfang (40-70 cm)</option>
+                          <option value="clothing">Kleidergrößen (S, M, L, XL, etc.)</option>
+                          <option value="dimensions">Maße (Länge x Breite in cm)</option>
+                        </select>
+
+                        {formData.sizeType === 'headCircumference' && (
+                          <div className="border rounded-lg p-3 bg-gray-50">
+                            <p className="text-sm text-gray-600 mb-2">
+                              Verfügbare Kopfumfänge (in cm):
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {[48, 50, 52, 54, 56, 58, 60].map((size) => (
+                                <label
+                                  key={size}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-white border rounded cursor-pointer hover:bg-primary-50"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={formData.availableSizes.includes(String(size))}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setFormData({
+                                          ...formData,
+                                          availableSizes: [...formData.availableSizes, String(size)].sort((a, b) => Number(a) - Number(b)),
+                                        });
+                                      } else {
+                                        setFormData({
+                                          ...formData,
+                                          availableSizes: formData.availableSizes.filter((s) => s !== String(size)),
+                                        });
+                                      }
+                                    }}
+                                    className="h-4 w-4 text-primary-500 rounded border-gray-300"
+                                  />
+                                  <span className="text-sm">{size} cm</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {formData.sizeType === 'clothing' && (
+                          <div className="border rounded-lg p-3 bg-gray-50">
+                            <p className="text-sm text-gray-600 mb-2">
+                              Verfügbare Kleidergrößen:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                                <label
+                                  key={size}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-white border rounded cursor-pointer hover:bg-primary-50"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={formData.availableSizes.includes(size)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setFormData({
+                                          ...formData,
+                                          availableSizes: [...formData.availableSizes, size],
+                                        });
+                                      } else {
+                                        setFormData({
+                                          ...formData,
+                                          availableSizes: formData.availableSizes.filter((s) => s !== size),
+                                        });
+                                      }
+                                    }}
+                                    className="h-4 w-4 text-primary-500 rounded border-gray-300"
+                                  />
+                                  <span className="text-sm">{size}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {formData.sizeType === 'dimensions' && (
+                          <div className="border rounded-lg p-3 bg-gray-50">
+                            <p className="text-sm text-gray-600 mb-2">
+                              Maße eingeben (Format: "30x40" für 30 cm x 40 cm):
+                            </p>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                placeholder="z.B. 30x40"
+                                className="flex-1 px-3 py-2 border rounded"
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const input = e.currentTarget;
+                                    const value = input.value.trim();
+                                    if (value && /^\d+x\d+$/.test(value) && !formData.availableSizes.includes(value)) {
+                                      setFormData({
+                                        ...formData,
+                                        availableSizes: [...formData.availableSizes, value],
+                                      });
+                                      input.value = '';
+                                    }
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                  const value = input.value.trim();
+                                  if (value && /^\d+x\d+$/.test(value) && !formData.availableSizes.includes(value)) {
+                                    setFormData({
+                                      ...formData,
+                                      availableSizes: [...formData.availableSizes, value],
+                                    });
+                                    input.value = '';
+                                  }
+                                }}
+                                className="px-4 py-2 bg-primary-400 text-white rounded hover:bg-primary-500"
+                                aria-label="Maß hinzufügen"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </button>
+                            </div>
+                            {formData.availableSizes.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {formData.availableSizes.map((size) => (
+                                  <span
+                                    key={size}
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-white border rounded text-sm"
+                                  >
+                                    {size} cm
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setFormData({
+                                          ...formData,
+                                          availableSizes: formData.availableSizes.filter((s) => s !== size),
+                                        })
+                                      }
+                                      className="text-red-500 hover:text-red-700"
+                                      aria-label={`Maß ${size} entfernen`}
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
                         <label htmlFor="product-image" className="block text-sm font-medium mb-1">Bild</label>
                         <div className="flex gap-2">
                           <input
@@ -629,6 +834,164 @@ export function AdminDashboard() {
                           </p>
                         )}
                       </div>
+
+                      <div>
+                        <label htmlFor="product-mask" className="block text-sm font-medium mb-1">
+                          Chamäleon-Maske (optional)
+                        </label>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Schwarz-Weiß-Rot-Bild: <strong>SCHWARZE</strong> Bereiche (RGB 0,0,0) = Außenstoff, <strong>ROTE</strong> Bereiche (RGB 255,0,0) = Innenstoff, alle anderen = original
+                        </p>
+                        <input
+                          id="product-mask"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            setMaskFile(e.target.files?.[0] || null)
+                          }
+                          className="w-full px-4 py-2 border rounded-lg"
+                        />
+                        {maskFile && (
+                          <p className="text-sm text-green-600 mt-1">
+                            Maske ausgewählt: {maskFile.name}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label htmlFor="fabric-scale" className="block text-sm font-medium mb-1">
+                          Stoffmuster-Skalierung
+                        </label>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Passt die Größe des Stoffmusters an (z.B. wenn Produkt und Stoff aus unterschiedlichen Entfernungen fotografiert wurden)
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs text-gray-500 w-12">25%</span>
+                          <input
+                            id="fabric-scale"
+                            type="range"
+                            min="0.25"
+                            max="3"
+                            step="0.05"
+                            value={formData.fabricScale}
+                            onChange={(e) =>
+                              setFormData({ ...formData, fabricScale: parseFloat(e.target.value) })
+                            }
+                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-400"
+                          />
+                          <span className="text-xs text-gray-500 w-12">300%</span>
+                        </div>
+                        <div className="text-center mt-2">
+                          <span className="text-sm font-semibold text-primary-600">
+                            {Math.round(formData.fabricScale * 100)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="product-scale" className="block text-sm font-medium mb-1">
+                          Produkt-Skalierung (Vorschau)
+                        </label>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Passt die Produktgröße in der Vorschau an, um schwarze Maskenflächen zu eliminieren
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs text-gray-500 w-12">25%</span>
+                          <input
+                            id="product-scale"
+                            type="range"
+                            min="0.25"
+                            max="3"
+                            step="0.05"
+                            value={formData.productScale}
+                            onChange={(e) =>
+                              setFormData({ ...formData, productScale: parseFloat(e.target.value) })
+                            }
+                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-secondary-400"
+                          />
+                          <span className="text-xs text-gray-500 w-12">300%</span>
+                        </div>
+                        <div className="text-center mt-2">
+                          <span className="text-sm font-semibold text-secondary-600">
+                            {Math.round(formData.productScale * 100)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Fabric Scale Preview */}
+                      {(imageFile || editingProduct?.imageUrl) && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Stoff für Vorschau auswählen
+                            </label>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+                              {fabrics.map((fabric) => {
+                                const imageUrl = fabric.thumbnailUrl || fabric.imageUrl;
+                                const fullImageUrl = imageUrl?.startsWith('blob:') || imageUrl?.startsWith('http')
+                                  ? imageUrl
+                                  : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${imageUrl}`;
+
+                                return (
+                                  <button
+                                    key={fabric.id}
+                                    type="button"
+                                    onClick={() => setPreviewFabricId(fabric.id === previewFabricId ? null : fabric.id)}
+                                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                                      previewFabricId === fabric.id
+                                        ? 'border-primary-500 ring-2 ring-primary-200'
+                                        : 'border-gray-200 hover:border-primary-300'
+                                    }`}
+                                    title={`${fabric.name} (${fabric.fabricType})`}
+                                  >
+                                    {imageUrl ? (
+                                      <img
+                                        src={fullImageUrl}
+                                        alt={fabric.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <span className="text-xs text-gray-400">Kein Bild</span>
+                                      </div>
+                                    )}
+                                    {previewFabricId === fabric.id && (
+                                      <div className="absolute inset-0 bg-primary-500 bg-opacity-20 flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {previewFabricId && (
+                              <p className="text-xs text-gray-600 mt-2">
+                                Ausgewählt: {fabrics.find(f => f.id === previewFabricId)?.name}
+                              </p>
+                            )}
+                          </div>
+
+                          {previewFabricId && (
+                            <FabricScalePreview
+                              productImageUrl={
+                                imageFile
+                                  ? URL.createObjectURL(imageFile)
+                                  : editingProduct?.imageUrl || null
+                              }
+                              maskImageUrl={
+                                maskFile
+                                  ? URL.createObjectURL(maskFile)
+                                  : editingProduct?.maskUrl || null
+                              }
+                              fabricScale={formData.fabricScale}
+                              productScale={formData.productScale}
+                              selectedFabric={fabrics.find(f => f.id === previewFabricId) || null}
+                            />
+                          )}
+                        </>
+                      )}
 
                       <label className="flex items-center gap-2">
                         <input
@@ -1154,6 +1517,9 @@ export function AdminDashboard() {
           onCancel={() => setShowProductCamera(false)}
         />
       )}
+
+      {/* Vouchers Tab */}
+      {activeTab === 'vouchers' && <AdminVouchers />}
 
       {showFabricCamera && (
         <CameraCapture

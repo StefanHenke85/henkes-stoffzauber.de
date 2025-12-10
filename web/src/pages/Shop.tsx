@@ -76,9 +76,12 @@ export function Shop() {
         <div className="relative py-12 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
-              src="/api/uploads/1764276141636-banner.jpg"
+              src="http://localhost:3001/uploads/1764276141636-banner.jpg"
               alt="Banner"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-primary-100/90 to-secondary-100/90"></div>
           </div>

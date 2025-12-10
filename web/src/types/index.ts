@@ -1,4 +1,6 @@
 // Product types
+export type SizeType = 'headCircumference' | 'clothing' | 'oneSize' | 'dimensions';
+
 export interface Product {
   id: string;
   _id?: string;
@@ -9,10 +11,15 @@ export interface Product {
   imageUrl: string;
   imageUrlWebp?: string;
   thumbnailUrl?: string;
+  maskUrl?: string; // Chameleon mask image URL
+  fabricScale?: number; // Fabric pattern scale multiplier (0.25-3.0, default 1.0)
+  productScale?: number; // Product scale multiplier for preview (0.25-3.0, default 1.0)
   fabrics?: string;
   availableFabrics?: string[]; // Array of fabric IDs
   isFeatured: boolean;
   isActive: boolean;
+  sizeType?: SizeType; // Type of size selection
+  availableSizes?: string[]; // e.g., ['S', 'M', 'L'] or ['52', '54', '56']
   createdAt?: string;
   updatedAt?: string;
 }
@@ -20,7 +27,9 @@ export interface Product {
 // Cart types
 export interface CartItem extends Product {
   quantity: number;
-  selectedFabrics?: Array<{ fabricId: string; fabricName: string }>; // Selected fabrics
+  selectedOuterFabric?: { fabricId: string; fabricName: string; fabricImageUrl?: string }; // Outer fabric
+  selectedInnerFabric?: { fabricId: string; fabricName: string; fabricImageUrl?: string }; // Inner fabric
+  selectedSize?: string; // Selected size
 }
 
 // Customer types
@@ -43,7 +52,9 @@ export interface OrderItem {
   price: number;
   quantity: number;
   imageUrl?: string;
-  selectedFabrics?: Array<{ fabricId: string; fabricName: string }>;
+  selectedOuterFabric?: { fabricId: string; fabricName: string; fabricImageUrl?: string };
+  selectedInnerFabric?: { fabricId: string; fabricName: string; fabricImageUrl?: string };
+  selectedSize?: string;
 }
 
 export interface Order {

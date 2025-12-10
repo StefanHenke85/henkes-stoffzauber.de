@@ -7,7 +7,7 @@ import {
   uploadImage,
   handleMulterError,
 } from '../middleware';
-import { processImage, deleteImage } from '../services';
+import { processImage, deleteImage, processMaskToMatchProduct } from '../services';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -144,26 +144,44 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
-  uploadImage.single('imageFile'),
+  uploadImage.fields([
+    { name: 'imageFile', maxCount: 1 },
+    { name: 'maskFile', maxCount: 1 }
+  ]),
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const { name, description, price, stock, fabrics, availableFabrics, isFeatured } = req.body;
+      const { name, description, price, stock, fabrics, availableFabrics, isFeatured, fabricScale, productScale } = req.body;
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
       let imageUrl = req.body.imageUrl || '';
       let imageUrlWebp = '';
       let thumbnailUrl = '';
+      let maskUrl = '';
 
       // Process uploaded image
-      if (req.file) {
+      const imageFile = files?.imageFile?.[0];
+      if (imageFile) {
         try {
-          const processed = await processImage(req.file.path);
+          const processed = await processImage(imageFile.path);
           imageUrl = processed.original;
           imageUrlWebp = processed.webp;
           thumbnailUrl = processed.thumbnail;
         } catch (imgError) {
           logger.error('Image processing error:', imgError);
-          imageUrl = `/uploads/${req.file.filename}`;
+          imageUrl = `/uploads/${imageFile.filename}`;
+        }
+      }
+
+      // Process uploaded mask - MUST match product image dimensions!
+      const maskFile = files?.maskFile?.[0];
+      if (maskFile && imageUrl) {
+        try {
+          // Resize mask to match product image exactly
+          maskUrl = await processMaskToMatchProduct(maskFile.path, imageUrl);
+        } catch (imgError) {
+          logger.error('Mask processing error:', imgError);
+          maskUrl = `/uploads/${maskFile.filename}`;
         }
       }
 
@@ -191,6 +209,9 @@ router.post(
         imageUrl,
         imageUrlWebp,
         thumbnailUrl,
+        maskUrl: maskUrl || undefined,
+        fabricScale: fabricScale ? Number(fabricScale) : 1.0,
+        productScale: productScale ? Number(productScale) : 1.0,
       });
 
       logger.info(`Product created: ${product.id} by ${req.user?.username}`);
@@ -218,7 +239,10 @@ router.put(
   '/:id',
   authenticateToken,
   requireAdmin,
-  uploadImage.single('imageFile'),
+  uploadImage.fields([
+    { name: 'imageFile', maxCount: 1 },
+    { name: 'maskFile', maxCount: 1 }
+  ]),
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
@@ -232,6 +256,7 @@ router.put(
         return;
       }
 
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       const updates: Partial<Product> = {};
 
       if (req.body.name !== undefined) updates.name = req.body.name;
@@ -254,22 +279,47 @@ router.put(
       if (req.body.isActive !== undefined) {
         updates.isActive = req.body.isActive === 'true' || req.body.isActive === true;
       }
+      if (req.body.fabricScale !== undefined) {
+        updates.fabricScale = Number(req.body.fabricScale) || 1.0;
+      }
+      if (req.body.productScale !== undefined) {
+        updates.productScale = Number(req.body.productScale) || 1.0;
+      }
 
       // Handle new image upload
-      if (req.file) {
+      const imageFile = files?.imageFile?.[0];
+      if (imageFile) {
         // Delete old images
         if (existingProduct.imageUrl) {
           await deleteImage(existingProduct.imageUrl);
         }
 
         try {
-          const processed = await processImage(req.file.path);
+          const processed = await processImage(imageFile.path);
           updates.imageUrl = processed.original;
           updates.imageUrlWebp = processed.webp;
           updates.thumbnailUrl = processed.thumbnail;
         } catch (imgError) {
           logger.error('Image processing error:', imgError);
-          updates.imageUrl = `/uploads/${req.file.filename}`;
+          updates.imageUrl = `/uploads/${imageFile.filename}`;
+        }
+      }
+
+      // Handle new mask upload - MUST match product image dimensions!
+      const maskFile = files?.maskFile?.[0];
+      if (maskFile) {
+        // Delete old mask
+        if (existingProduct.maskUrl) {
+          await deleteImage(existingProduct.maskUrl);
+        }
+
+        try {
+          // Use updated imageUrl if new image was uploaded, otherwise use existing
+          const productImageUrl = updates.imageUrl || existingProduct.imageUrl;
+          updates.maskUrl = await processMaskToMatchProduct(maskFile.path, productImageUrl);
+        } catch (imgError) {
+          logger.error('Mask processing error:', imgError);
+          updates.maskUrl = `/uploads/${maskFile.filename}`;
         }
       }
 
@@ -315,6 +365,11 @@ router.delete(
       // Delete associated images
       if (product.imageUrl) {
         await deleteImage(product.imageUrl);
+      }
+
+      // Delete associated mask
+      if (product.maskUrl) {
+        await deleteImage(product.maskUrl);
       }
 
       productsStore.delete(req.params.id);

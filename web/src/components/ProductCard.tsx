@@ -49,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Image */}
       <Link
         to={`/shop/${productId}`}
-        className="block aspect-square overflow-hidden"
+        className="block aspect-[4/5] overflow-hidden"
         aria-label={`${product.name} ansehen`}
       >
         <img
@@ -59,7 +59,7 @@ export function ProductCard({ product }: ProductCardProps) {
           loading="lazy"
           decoding="async"
           width="400"
-          height="400"
+          height="500"
           onError={() => setImageError(true)}
         />
       </Link>

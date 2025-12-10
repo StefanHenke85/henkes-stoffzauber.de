@@ -101,6 +101,65 @@ export async function getImageMetadata(filePath: string): Promise<sharp.Metadata
 }
 
 /**
+ * Process mask image to match product image dimensions exactly
+ * @param maskPath - Path to uploaded mask file
+ * @param productImageUrl - Original image URL (will be converted to WebP if exists)
+ */
+export async function processMaskToMatchProduct(maskPath: string, productImageUrl: string): Promise<string> {
+  try {
+    // Prefer WebP version if it exists (this is what frontend displays)
+    let productFilename = path.basename(productImageUrl);
+    const ext = path.extname(productFilename);
+    const baseName = path.basename(productFilename, ext);
+
+    // Try WebP version first
+    const webpFilename = `${baseName}.webp`;
+    const webpPath = path.join(uploadDir, webpFilename);
+    const originalPath = path.join(uploadDir, productFilename);
+
+    let productPath = originalPath;
+    try {
+      await fs.access(webpPath);
+      productPath = webpPath;
+      logger.info(`Using WebP version for mask sizing: ${webpFilename}`);
+    } catch {
+      logger.info(`WebP not found, using original: ${productFilename}`);
+    }
+
+    // Get dimensions of product image
+    const productMetadata = await sharp(productPath).metadata();
+    if (!productMetadata.width || !productMetadata.height) {
+      throw new Error('Could not get product image dimensions');
+    }
+
+    logger.info(`Product dimensions: ${productMetadata.width}x${productMetadata.height}`);
+
+    // Resize mask to exact product dimensions
+    const maskExt = path.extname(maskPath);
+    const maskBaseName = path.basename(maskPath, maskExt);
+    const outputPath = path.join(path.dirname(maskPath), `${maskBaseName}-resized${maskExt}`);
+
+    await sharp(maskPath)
+      .resize(productMetadata.width, productMetadata.height, {
+        fit: 'fill', // Force exact dimensions
+      })
+      .toFile(outputPath);
+
+    // Delete original mask, keep resized version
+    await fs.unlink(maskPath);
+    await fs.rename(outputPath, maskPath);
+
+    logger.info(`Mask resized to match product: ${productMetadata.width}x${productMetadata.height}`);
+
+    return `/uploads/${path.basename(maskPath)}`;
+  } catch (error) {
+    logger.error('Mask resize error:', error);
+    // Return original if processing fails
+    return `/uploads/${path.basename(maskPath)}`;
+  }
+}
+
+/**
  * Optimize existing images (for migration)
  */
 export async function optimizeExistingImages(): Promise<number> {
