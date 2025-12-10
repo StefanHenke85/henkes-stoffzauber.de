@@ -34,7 +34,11 @@
       "Bash(cmd /c \"taskkill /PID 19684 /F\")",
       "Bash(cmd /c \"taskkill /PID 93840 /F\")",
       "Bash(rsync:*)",
-      "Bash(scp:*)"
+      "Bash(scp:*)",
+      "Bash(git checkout:*)",
+      "Bash(tar czf:*)",
+      "Bash(sshpass -p 'o6gZZqiM' ssh -o StrictHostKeyChecking=no root@81.7.11.191 \"ls -la /var/www/henkes-stoffzauber.de/ | head -20\")",
+      "Bash(expect:*)"
     ],
     "deny": [],
     "ask": []
