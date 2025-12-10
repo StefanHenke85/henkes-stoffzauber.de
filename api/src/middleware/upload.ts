@@ -68,10 +68,21 @@ export const uploadImages = multer({
 // Error handler for multer
 export const handleMulterError = (
   err: Error,
-  _req: Request,
+  req: Request,
   res: import('express').Response,
   next: import('express').NextFunction
 ): void => {
+  // Log all multer errors for debugging
+  const logger = require('../utils/logger').logger;
+  logger.error('Multer error:', {
+    error: err.message,
+    code: (err as any).code,
+    field: (err as any).field,
+    url: req.url,
+    method: req.method,
+    contentLength: req.headers['content-length']
+  });
+
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       res.status(400).json({
