@@ -813,9 +813,14 @@ export function AdminDashboard() {
                             id="product-image"
                             type="file"
                             accept="image/*"
-                            onChange={(e) =>
-                              setImageFile(e.target.files?.[0] || null)
-                            }
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file && file.size > 0) {
+                                setImageFile(file);
+                              } else {
+                                setImageFile(null);
+                              }
+                            }}
                             className="flex-1 px-4 py-2 border rounded-lg"
                           />
                           <button
@@ -846,9 +851,14 @@ export function AdminDashboard() {
                           id="product-mask"
                           type="file"
                           accept="image/*"
-                          onChange={(e) =>
-                            setMaskFile(e.target.files?.[0] || null)
-                          }
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file && file.size > 0) {
+                              setMaskFile(file);
+                            } else {
+                              setMaskFile(null);
+                            }
+                          }}
                           className="w-full px-4 py-2 border rounded-lg"
                         />
                         {maskFile && (
