@@ -158,7 +158,8 @@ export function FabricScalePreview({
     const urlToUse = webpUrl || url;
     if (urlToUse.startsWith('blob:')) return urlToUse;
     if (urlToUse.startsWith('http')) return urlToUse;
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${urlToUse}`;
+    // Use relative URL for uploads
+    return urlToUse;
   };
 
   return (

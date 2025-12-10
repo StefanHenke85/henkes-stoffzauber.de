@@ -76,7 +76,7 @@ export function Shop() {
         <div className="relative py-12 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
-              src="http://localhost:3001/uploads/1764276141636-banner.jpg"
+              src="/uploads/1764276141636-banner.jpg"
               alt="Banner"
               className="w-full h-full object-cover"
               onError={(e) => {

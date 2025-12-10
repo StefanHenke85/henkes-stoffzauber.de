@@ -42,7 +42,7 @@ export function Home() {
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="http://localhost:3001/uploads/1764276141636-banner.jpg"
+            src="/uploads/1764276141636-banner.jpg"
             alt="Henkes Stoffzauber Banner"
             className="w-full h-full object-cover"
             loading="eager"

@@ -930,7 +930,7 @@ export function AdminDashboard() {
                                 const imageUrl = fabric.thumbnailUrl || fabric.imageUrl;
                                 const fullImageUrl = imageUrl?.startsWith('blob:') || imageUrl?.startsWith('http')
                                   ? imageUrl
-                                  : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${imageUrl}`;
+                                  : imageUrl;
 
                                 return (
                                   <button
