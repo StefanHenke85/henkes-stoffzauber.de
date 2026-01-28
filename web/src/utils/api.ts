@@ -1,6 +1,10 @@
 import axios, { AxiosError } from 'axios';
 import type { ApiResponse, Product, Order, CheckoutData, CheckoutResponse, PaginatedResponse, AuthUser, Fabric } from '@/types';
 
+// Simple in-memory cache
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
@@ -8,6 +12,21 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Helper function to get cached data
+const getCached = <T>(key: string): T | null => {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data as T;
+  }
+  cache.delete(key);
+  return null;
+};
+
+// Helper function to set cached data
+const setCached = (key: string, data: any): void => {
+  cache.set(key, { data, timestamp: Date.now() });
+};
 
 // Response interceptor for error handling
 api.interceptors.response.use(
@@ -21,18 +40,36 @@ api.interceptors.response.use(
 // Products API
 export const productsApi = {
   getAll: async (): Promise<Product[]> => {
+    const cacheKey = 'products:all';
+    const cached = getCached<Product[]>(cacheKey);
+    if (cached) return cached;
+
     const { data } = await api.get<ApiResponse<Product[]>>('/products');
-    return data.data || [];
+    const products = data.data || [];
+    setCached(cacheKey, products);
+    return products;
   },
 
   getFeatured: async (): Promise<Product[]> => {
+    const cacheKey = 'products:featured';
+    const cached = getCached<Product[]>(cacheKey);
+    if (cached) return cached;
+
     const { data } = await api.get<ApiResponse<Product[]>>('/products/featured');
-    return data.data || [];
+    const products = data.data || [];
+    setCached(cacheKey, products);
+    return products;
   },
 
   getById: async (id: string): Promise<Product | null> => {
+    const cacheKey = `products:${id}`;
+    const cached = getCached<Product | null>(cacheKey);
+    if (cached) return cached;
+
     const { data } = await api.get<ApiResponse<Product>>(`/products/${id}`);
-    return data.data || null;
+    const product = data.data || null;
+    setCached(cacheKey, product);
+    return product;
   },
 
   // Admin methods
@@ -145,18 +182,36 @@ export const authApi = {
 // Fabrics API
 export const fabricsApi = {
   getAll: async (): Promise<Fabric[]> => {
+    const cacheKey = 'fabrics:all';
+    const cached = getCached<Fabric[]>(cacheKey);
+    if (cached) return cached;
+
     const { data } = await api.get<ApiResponse<Fabric[]>>('/fabrics');
-    return data.data || [];
+    const fabrics = data.data || [];
+    setCached(cacheKey, fabrics);
+    return fabrics;
   },
 
   getFeatured: async (): Promise<Fabric[]> => {
+    const cacheKey = 'fabrics:featured';
+    const cached = getCached<Fabric[]>(cacheKey);
+    if (cached) return cached;
+
     const { data } = await api.get<ApiResponse<Fabric[]>>('/fabrics/featured');
-    return data.data || [];
+    const fabrics = data.data || [];
+    setCached(cacheKey, fabrics);
+    return fabrics;
   },
 
   getById: async (id: string): Promise<Fabric | null> => {
+    const cacheKey = `fabrics:${id}`;
+    const cached = getCached<Fabric | null>(cacheKey);
+    if (cached) return cached;
+
     const { data } = await api.get<ApiResponse<Fabric>>(`/fabrics/${id}`);
-    return data.data || null;
+    const fabric = data.data || null;
+    setCached(cacheKey, fabric);
+    return fabric;
   },
 
   // Admin methods
@@ -208,6 +263,58 @@ export const vouchersApi = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/vouchers/${id}`);
+  },
+};
+
+// Patterns API (Schnittmuster)
+export const patternsApi = {
+  getAll: async (search?: string, type?: string): Promise<ApiResponse<Array<{
+    id: string;
+    filename: string;
+    name: string;
+    type: 'pdf' | 'zip';
+    size: number;
+    sizeFormatted: string;
+    createdAt: string;
+    modifiedAt: string;
+  }>>> => {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (type && type !== 'all') params.append('type', type);
+    const { data } = await api.get(`/patterns?${params}`);
+    return data;
+  },
+
+  getPreviewUrl: (id: string): string => {
+    return `/api/patterns/${id}/preview`;
+  },
+
+  getDownloadUrl: async (id: string): Promise<string> => {
+    return `/api/patterns/${id}/download`;
+  },
+
+  createShareLink: async (id: string): Promise<ApiResponse<{
+    shareUrl: string;
+    expiresAt: string;
+    expiresIn: string;
+  }>> => {
+    const { data } = await api.post(`/patterns/${id}/share`);
+    return data;
+  },
+
+  getActiveShares: async (): Promise<ApiResponse<Array<{
+    token: string;
+    filename: string;
+    expiresAt: string;
+    createdBy: string;
+    shareUrl: string;
+  }>>> => {
+    const { data } = await api.get('/patterns/shares/active');
+    return data;
+  },
+
+  deleteShare: async (token: string): Promise<void> => {
+    await api.delete(`/patterns/shares/${token}`);
   },
 };
 

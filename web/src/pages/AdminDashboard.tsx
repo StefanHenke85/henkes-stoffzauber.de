@@ -15,6 +15,7 @@ import {
   Camera,
   Download,
   Tag,
+  Scissors,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,10 +27,11 @@ import {
 } from '@/utils/helpers';
 import { CameraCapture } from '@/components/CameraCapture';
 import { AdminVouchers } from '@/components/AdminVouchers';
+import { AdminPatterns } from '@/components/AdminPatterns';
 import { FabricScalePreview } from '@/components/FabricScalePreview';
 import type { Product, Order, Fabric } from '@/types';
 
-type Tab = 'products' | 'orders' | 'fabrics' | 'vouchers';
+type Tab = 'products' | 'orders' | 'fabrics' | 'vouchers' | 'patterns';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -472,6 +474,18 @@ export function AdminDashboard() {
               >
                 <Tag className="h-4 w-4" />
                 Gutscheine
+              </button>
+              <button
+                onClick={() => setActiveTab('patterns')}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+                  activeTab === 'patterns'
+                    ? 'bg-primary-400 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                )}
+              >
+                <Scissors className="h-4 w-4" />
+                Schnittmuster
               </button>
             </div>
           </div>
@@ -1530,6 +1544,13 @@ export function AdminDashboard() {
 
       {/* Vouchers Tab */}
       {activeTab === 'vouchers' && <AdminVouchers />}
+
+      {/* Patterns Tab */}
+      {activeTab === 'patterns' && (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <AdminPatterns />
+        </main>
+      )}
 
       {showFabricCamera && (
         <CameraCapture
