@@ -81,8 +81,16 @@ export interface JwtPayload {
   role: string;
 }
 
+export interface TailorPayload {
+  id: string;
+  username: string;
+  name: string;
+  slug: string;
+}
+
 export interface AuthRequest extends Request {
   user?: JwtPayload;
+  tailor?: TailorPayload;
 }
 
 // API Response Types

@@ -31,3 +31,28 @@ export function formatDate(date: Date = new Date()): string {
 export function randomString(length: number = 32): string {
   return crypto.randomBytes(length).toString('hex').slice(0, length);
 }
+
+/**
+ * Convert snake_case to camelCase
+ */
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+/**
+ * Transform database object (snake_case) to API object (camelCase)
+ */
+export function transformDbToApi<T = any>(obj: any): T {
+  if (!obj || typeof obj !== 'object') return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => transformDbToApi(item)) as T;
+  }
+
+  const transformed: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const camelKey = snakeToCamel(key);
+    transformed[camelKey] = value;
+  }
+  return transformed as T;
+}

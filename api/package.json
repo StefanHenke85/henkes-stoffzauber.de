@@ -8,13 +8,15 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migrate:supabase": "tsx src/scripts/migrate-to-supabase.ts"
   },
   "keywords": [],
   "author": "Henkes Stoffzauber",
   "license": "ISC",
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
+    "@supabase/supabase-js": "^2.87.1",
     "@types/qrcode": "^1.5.6",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",

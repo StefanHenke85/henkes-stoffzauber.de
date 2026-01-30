@@ -40,6 +40,11 @@ const envSchema = z.object({
   // File Upload
   MAX_FILE_SIZE_MB: z.string().transform(Number).default('5'),
   UPLOAD_PATH: z.string().default('./uploads'),
+
+  // Supabase
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_ANON_KEY: z.string().min(1),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 });
 
 const parseEnv = () => {
