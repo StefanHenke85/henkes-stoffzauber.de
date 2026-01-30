@@ -1,5 +1,5 @@
 import { Router, Response, Request } from 'express';
-import { productsStore, Product } from '../data/jsonStore';
+import { supabase, DbProduct } from '../config/supabase';
 import { AuthRequest, ApiResponse, PaginatedResponse } from '../types';
 import {
   authenticateToken,
@@ -9,6 +9,7 @@ import {
 } from '../middleware';
 import { processImage, deleteImage, processMaskToMatchProduct } from '../services';
 import { logger } from '../utils/logger';
+import { transformDbToApi } from '../utils/helpers';
 
 const router = Router();
 
@@ -18,10 +19,30 @@ const router = Router();
  */
 router.get('/', async (_req: Request, res: Response<ApiResponse>) => {
   try {
-    const products = productsStore.getActive();
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*, tailors(id, name)')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error('Get products error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Fehler beim Laden der Produkte',
+      });
+    }
+
+    // Add tailorName to each product
+    const productsWithTailor = (products || []).map((p: any) => ({
+      ...p,
+      tailor_name: p.tailors?.name || null,
+      tailors: undefined, // Remove nested object
+    }));
+
     res.json({
       success: true,
-      data: products,
+      data: transformDbToApi(productsWithTailor),
     });
   } catch (error) {
     logger.error('Get products error:', error);
@@ -38,10 +59,32 @@ router.get('/', async (_req: Request, res: Response<ApiResponse>) => {
  */
 router.get('/featured', async (_req: Request, res: Response<ApiResponse>) => {
   try {
-    const products = productsStore.getFeatured().slice(0, 8);
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*, tailors(id, name)')
+      .eq('is_active', true)
+      .eq('is_featured', true)
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    if (error) {
+      logger.error('Get featured products error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Fehler beim Laden der Featured-Produkte',
+      });
+    }
+
+    // Add tailorName to each product
+    const productsWithTailor = (products || []).map((p: any) => ({
+      ...p,
+      tailor_name: p.tailors?.name || null,
+      tailors: undefined,
+    }));
+
     res.json({
       success: true,
-      data: products,
+      data: transformDbToApi(productsWithTailor),
     });
   } catch (error) {
     logger.error('Get featured products error:', error);
@@ -66,27 +109,35 @@ router.get(
       const limit = parseInt(req.query.limit as string) || 20;
       const search = req.query.search as string;
 
-      let products = productsStore.getAll();
+      let query = supabase
+        .from('products')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
 
       if (search) {
         const q = search.toLowerCase();
-        products = products.filter(p =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
-        );
+        query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
       }
 
-      // Sort by createdAt descending
-      products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      const total = products.length;
       const start = (page - 1) * limit;
-      const data = products.slice(start, start + limit);
+      query = query.range(start, start + limit - 1);
+
+      const { data: products, count, error } = await query;
+
+      if (error) {
+        logger.error('Admin get products error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Laden der Produkte',
+        });
+      }
+
+      const total = count || 0;
 
       res.json({
         success: true,
         data: {
-          data,
+          data: transformDbToApi(products),
           pagination: {
             total,
             page,
@@ -113,19 +164,29 @@ router.get(
  */
 router.get('/:id', async (req: Request, res: Response<ApiResponse>) => {
   try {
-    const product = productsStore.getById(req.params.id);
+    const { data: product, error } = await supabase
+      .from('products')
+      .select('*, tailors(id, name)')
+      .eq('id', req.params.id)
+      .single();
 
-    if (!product) {
-      res.status(404).json({
+    if (error || !product) {
+      return res.status(404).json({
         success: false,
         error: 'Produkt nicht gefunden',
       });
-      return;
     }
+
+    // Add tailorName to product
+    const productWithTailor = {
+      ...product,
+      tailor_name: (product as any).tailors?.name || null,
+      tailors: undefined,
+    };
 
     res.json({
       success: true,
-      data: product,
+      data: transformDbToApi(productWithTailor),
     });
   } catch (error) {
     logger.error('Get product error:', error);
@@ -194,28 +255,44 @@ router.post(
         }
       }
 
-      const product = productsStore.create({
+      const productId = `${Date.now()}`;
+      const productData = {
+        id: productId,
         name: name || '',
         description: description || '',
         price: Number(price) || 0,
         stock: Number(stock) || 0,
         fabrics: fabrics || '',
-        availableFabrics: parsedAvailableFabrics,
-        isFeatured: isFeatured === 'true' || isFeatured === true,
-        isActive: true,
-        imageUrl,
-        imageUrlWebp,
-        thumbnailUrl,
-        maskUrl: maskUrl || undefined,
-        fabricScale: fabricScale ? Number(fabricScale) : 1.0,
-        productScale: productScale ? Number(productScale) : 1.0,
-      });
+        available_fabrics: parsedAvailableFabrics || null,
+        is_featured: isFeatured === 'true' || isFeatured === true,
+        is_active: true,
+        image_url: imageUrl,
+        image_url_webp: imageUrlWebp || null,
+        thumbnail_url: thumbnailUrl || null,
+        mask_url: maskUrl || null,
+        fabric_scale: fabricScale ? Number(fabricScale) : 1.0,
+        product_scale: productScale ? Number(productScale) : 1.0,
+      };
+
+      const { data: product, error } = await supabase
+        .from('products')
+        .insert(productData)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Create product error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Erstellen des Produkts',
+        });
+      }
 
       logger.info(`Product created: ${product.id} by ${req.user?.username}`);
 
       res.status(201).json({
         success: true,
-        data: product,
+        data: transformDbToApi(product),
         message: 'Produkt erstellt',
       });
     } catch (error) {
@@ -240,18 +317,21 @@ router.put(
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const existingProduct = productsStore.getById(req.params.id);
+      const { data: existingProduct, error: fetchError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
 
-      if (!existingProduct) {
-        res.status(404).json({
+      if (fetchError || !existingProduct) {
+        return res.status(404).json({
           success: false,
           error: 'Produkt nicht gefunden',
         });
-        return;
       }
 
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-      const updates: Partial<Product> = {};
+      const updates: Partial<DbProduct> = {};
 
       if (req.body.name !== undefined) updates.name = req.body.name;
       if (req.body.description !== undefined) updates.description = req.body.description;
@@ -260,35 +340,35 @@ router.put(
       if (req.body.fabrics !== undefined) updates.fabrics = req.body.fabrics;
       if (req.body.availableFabrics !== undefined) {
         try {
-          updates.availableFabrics = typeof req.body.availableFabrics === 'string'
+          updates.available_fabrics = typeof req.body.availableFabrics === 'string'
             ? JSON.parse(req.body.availableFabrics)
             : req.body.availableFabrics;
         } catch {
-          updates.availableFabrics = [];
+          updates.available_fabrics = [];
         }
       }
       if (req.body.isFeatured !== undefined) {
-        updates.isFeatured = req.body.isFeatured === 'true' || req.body.isFeatured === true;
+        updates.is_featured = req.body.isFeatured === 'true' || req.body.isFeatured === true;
       }
       if (req.body.isActive !== undefined) {
-        updates.isActive = req.body.isActive === 'true' || req.body.isActive === true;
+        updates.is_active = req.body.isActive === 'true' || req.body.isActive === true;
       }
       if (req.body.fabricScale !== undefined) {
-        updates.fabricScale = Number(req.body.fabricScale) || 1.0;
+        updates.fabric_scale = Number(req.body.fabricScale) || 1.0;
       }
       if (req.body.productScale !== undefined) {
-        updates.productScale = Number(req.body.productScale) || 1.0;
+        updates.product_scale = Number(req.body.productScale) || 1.0;
       }
       if (req.body.sizeType !== undefined) {
-        updates.sizeType = req.body.sizeType;
+        updates.size_type = req.body.sizeType;
       }
       if (req.body.availableSizes !== undefined) {
         try {
-          updates.availableSizes = typeof req.body.availableSizes === 'string'
+          updates.available_sizes = typeof req.body.availableSizes === 'string'
             ? JSON.parse(req.body.availableSizes)
             : req.body.availableSizes;
         } catch {
-          updates.availableSizes = [];
+          updates.available_sizes = [];
         }
       }
 
@@ -296,18 +376,18 @@ router.put(
       const imageFile = files?.imageFile?.[0];
       if (imageFile) {
         // Delete old images
-        if (existingProduct.imageUrl) {
-          await deleteImage(existingProduct.imageUrl);
+        if (existingProduct.image_url) {
+          await deleteImage(existingProduct.image_url);
         }
 
         try {
           const processed = await processImage(imageFile.path);
-          updates.imageUrl = processed.original;
-          updates.imageUrlWebp = processed.webp;
-          updates.thumbnailUrl = processed.thumbnail;
+          updates.image_url = processed.original;
+          updates.image_url_webp = processed.webp;
+          updates.thumbnail_url = processed.thumbnail;
         } catch (imgError) {
           logger.error('Image processing error:', imgError);
-          updates.imageUrl = `/uploads/${imageFile.filename}`;
+          updates.image_url = `/uploads/${imageFile.filename}`;
         }
       }
 
@@ -315,27 +395,40 @@ router.put(
       const maskFile = files?.maskFile?.[0];
       if (maskFile) {
         // Delete old mask
-        if (existingProduct.maskUrl) {
-          await deleteImage(existingProduct.maskUrl);
+        if (existingProduct.mask_url) {
+          await deleteImage(existingProduct.mask_url);
         }
 
         try {
           // Use updated imageUrl if new image was uploaded, otherwise use existing
-          const productImageUrl = updates.imageUrl || existingProduct.imageUrl;
-          updates.maskUrl = await processMaskToMatchProduct(maskFile.path, productImageUrl);
+          const productImageUrl = updates.image_url || existingProduct.image_url;
+          updates.mask_url = await processMaskToMatchProduct(maskFile.path, productImageUrl!);
         } catch (imgError) {
           logger.error('Mask processing error:', imgError);
-          updates.maskUrl = `/uploads/${maskFile.filename}`;
+          updates.mask_url = `/uploads/${maskFile.filename}`;
         }
       }
 
-      const product = productsStore.update(req.params.id, updates);
+      const { data: product, error } = await supabase
+        .from('products')
+        .update(updates)
+        .eq('id', req.params.id)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Update product error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Aktualisieren des Produkts',
+        });
+      }
 
       logger.info(`Product updated: ${req.params.id} by ${req.user?.username}`);
 
       res.json({
         success: true,
-        data: product,
+        data: transformDbToApi(product),
         message: 'Produkt aktualisiert',
       });
     } catch (error) {
@@ -358,27 +451,41 @@ router.delete(
   requireAdmin,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const product = productsStore.getById(req.params.id);
+      const { data: product, error: fetchError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
 
-      if (!product) {
-        res.status(404).json({
+      if (fetchError || !product) {
+        return res.status(404).json({
           success: false,
           error: 'Produkt nicht gefunden',
         });
-        return;
       }
 
       // Delete associated images
-      if (product.imageUrl) {
-        await deleteImage(product.imageUrl);
+      if (product.image_url) {
+        await deleteImage(product.image_url);
       }
 
       // Delete associated mask
-      if (product.maskUrl) {
-        await deleteImage(product.maskUrl);
+      if (product.mask_url) {
+        await deleteImage(product.mask_url);
       }
 
-      productsStore.delete(req.params.id);
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', req.params.id);
+
+      if (error) {
+        logger.error('Delete product error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Löschen des Produkts',
+        });
+      }
 
       logger.info(`Product deleted: ${req.params.id} by ${req.user?.username}`);
 

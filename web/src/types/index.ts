@@ -20,6 +20,8 @@ export interface Product {
   isActive: boolean;
   sizeType?: SizeType; // Type of size selection
   availableSizes?: string[]; // e.g., ['S', 'M', 'L'] or ['52', '54', '56']
+  tailorId?: string; // ID des Verkäufers
+  tailorName?: string; // Name des Verkäufers
   createdAt?: string;
   updatedAt?: string;
 }

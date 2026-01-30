@@ -94,13 +94,19 @@ export function ProductCard({ product }: ProductCardProps) {
           {formatCurrency(product.price)}
         </p>
 
+        {product.tailorName && (
+          <p className="text-sm text-neutral-500 mb-2">
+            von <span className="font-medium text-neutral-700">{product.tailorName}</span>
+          </p>
+        )}
+
         <p
           className={cn(
             'text-sm font-medium mb-3',
             isAvailable ? 'text-green-600' : 'text-red-500'
           )}
         >
-          {isAvailable ? 'Sofort verfügbar' : 'Ausverkauft'}
+          {isAvailable ? 'Verfügbar' : 'Ausverkauft'}
         </p>
 
         <button

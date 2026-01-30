@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 
@@ -24,6 +24,11 @@ const Admin = lazy(() => import('@/pages/Admin').then(m => ({ default: m.Admin }
 const Impressum = lazy(() => import('@/pages/Impressum').then(m => ({ default: m.Impressum })));
 const Datenschutz = lazy(() => import('@/pages/Datenschutz').then(m => ({ default: m.Datenschutz })));
 
+// Seller Pages (Verkäufer)
+const SellerRegister = lazy(() => import('@/pages/TailorRegister').then(m => ({ default: m.TailorRegister })));
+const SellerLogin = lazy(() => import('@/pages/TailorLogin').then(m => ({ default: m.TailorLogin })));
+const SellerDashboard = lazy(() => import('@/pages/TailorDashboard').then(m => ({ default: m.TailorDashboard })));
+
 // Loading Fallback Component
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -34,12 +39,24 @@ const LoadingFallback = () => (
   </div>
 );
 
+// ScrollToTop Component - scrolls to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <HelmetProvider>
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <ScrollToTop />
             <Layout>
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
@@ -52,6 +69,9 @@ function App() {
                   <Route path="/checkout/success" element={<CheckoutSuccess />} />
                   <Route path="/checkout/cancel" element={<CheckoutCancel />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/verkaeufer/registrieren" element={<SellerRegister />} />
+                  <Route path="/verkaeufer/login" element={<SellerLogin />} />
+                  <Route path="/verkaeufer/dashboard" element={<SellerDashboard />} />
                   <Route path="/impressum" element={<Impressum />} />
                   <Route path="/datenschutz" element={<Datenschutz />} />
                   <Route

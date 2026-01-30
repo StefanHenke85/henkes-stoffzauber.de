@@ -16,7 +16,6 @@ export function ProductDetail() {
   const [imageError, setImageError] = useState(false);
   const [allFabrics, setAllFabrics] = useState<Fabric[]>([]);
   const [selectedOuterFabricId, setSelectedOuterFabricId] = useState<string | null>(null);
-  const [selectedInnerFabricId, setSelectedInnerFabricId] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [chameleonImageUrl, setChameleonImageUrl] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -24,7 +23,6 @@ export function ProductDetail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const productImgRef = useRef<HTMLImageElement>(null);
   const fabricImgRef = useRef<HTMLImageElement>(null);
-  const innerFabricImgRef = useRef<HTMLImageElement>(null);
   const maskImgRef = useRef<HTMLImageElement>(null);
 
   const { addItem, isInCart, getItemQuantity } = useCart();
@@ -97,7 +95,6 @@ export function ProductDetail() {
       const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
       const productImg = productImgRef.current!;
       const fabricImg = fabricImgRef.current!;
-      const innerFabricImg = innerFabricImgRef.current;
       const maskImg = maskImgRef.current;
 
       // Warte bis alle Bilder geladen sind
@@ -105,9 +102,6 @@ export function ProductDetail() {
         productImg.complete ? Promise.resolve() : new Promise(r => productImg.onload = r),
         fabricImg.complete ? Promise.resolve() : new Promise(r => fabricImg.onload = r)
       ];
-      if (innerFabricImg && selectedInnerFabricId) {
-        imagesToLoad.push(innerFabricImg.complete ? Promise.resolve() : new Promise(r => innerFabricImg!.onload = r));
-      }
       if (maskImg && product.maskUrl) {
         imagesToLoad.push(maskImg.complete ? Promise.resolve() : new Promise(r => maskImg!.onload = r));
       }
@@ -156,31 +150,7 @@ export function ProductDetail() {
         scaledFabricHeight
       );
 
-      const outerFabricData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-      // Zeichne Innen-Stoffmuster (falls vorhanden, OHNE Kacheln)
-      let innerFabricData: ImageData | null = null;
-      if (innerFabricImg && selectedInnerFabricId) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Skaliere Innenstoff basierend auf fabricScale
-        const scaledInnerWidth = innerFabricImg.naturalWidth * fabricScaleValue;
-        const scaledInnerHeight = innerFabricImg.naturalHeight * fabricScaleValue;
-
-        // Zentriere und zeichne Innenstoff EINMAL (ohne Kacheln)
-        const innerFabricX = (canvas.width - scaledInnerWidth) / 2;
-        const innerFabricY = (canvas.height - scaledInnerHeight) / 2;
-
-        ctx.drawImage(
-          innerFabricImg,
-          innerFabricX,
-          innerFabricY,
-          scaledInnerWidth,
-          scaledInnerHeight
-        );
-
-        innerFabricData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      }
+      const fabricData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
       // Lade Maske falls vorhanden
       let maskData: ImageData | null = null;
@@ -256,62 +226,31 @@ export function ProductDetail() {
         // Prüfe ob Pixel eingefärbt werden soll
         let shouldColor = false;
 
-        let fabricToUse: 'outer' | 'inner' | null = null;
-
         if (maskData) {
-          // MIT MASKE: Erkenne Schwarz (Außenstoff) und Rot (Innenstoff)
+          // MIT MASKE: Erkenne Schwarz für Stoffbereich
           const maskR = maskData.data[i];
           const maskG = maskData.data[i + 1];
           const maskB = maskData.data[i + 2];
           const maskBrightness = (maskR + maskG + maskB) / 3 / 255;
 
-          // Prüfe auf SCHWARZ (RGB ≈ 0,0,0) - Außenstoff
-          if (maskBrightness < 0.1) {
-            fabricToUse = 'outer';
-            shouldColor = true;
-          }
-          // Prüfe auf ROT (R > 200, G < 50, B < 50) - Innenstoff
-          else if (maskR > 200 && maskG < 50 && maskB < 50 && innerFabricData) {
-            fabricToUse = 'inner';
-            shouldColor = true;
-          }
-          // Alle anderen Bereiche = original behalten
-          else {
-            shouldColor = false;
-          }
-
-          // Debug erste 100 Pixel
-          if (i < 400 && i % 400 === 0) {
-            console.log(`Pixel ${i/4}: RGB(${maskR},${maskG},${maskB}) brightness=${maskBrightness.toFixed(2)}, fabric=${fabricToUse || 'none'}`);
-          }
+          // Prüfe auf SCHWARZ (RGB ≈ 0,0,0) - Stoffbereich
+          shouldColor = maskBrightness < 0.1;
         } else {
           // OHNE MASKE: Nutze Helligkeits-Erkennung (alte Methode)
           shouldColor = brightness < 0.7; // Dunkle Pixel = einfärben
-          fabricToUse = 'outer';
         }
 
-        if (shouldColor && fabricToUse) {
-          // Wähle das passende Stoffmuster
-          const fabricData = fabricToUse === 'inner' && innerFabricData ? innerFabricData : outerFabricData;
-
+        if (shouldColor) {
           // Nehme Stofffarbe an dieser Position
           const fabricR = fabricData.data[i];
           const fabricG = fabricData.data[i + 1];
           const fabricB = fabricData.data[i + 2];
 
-          if (fabricToUse === 'inner') {
-            // INNENSTOFF: Volle Deckkraft, keine Transparenz
-            result.data[i] = fabricR;
-            result.data[i + 1] = fabricG;
-            result.data[i + 2] = fabricB;
-            result.data[i + 3] = productA;
-          } else {
-            // AUSSENSTOFF: Übertrage mit Produkt-Helligkeit (Chamäleon-Effekt)
-            result.data[i] = Math.min(255, fabricR * brightness * 1.4);
-            result.data[i + 1] = Math.min(255, fabricG * brightness * 1.4);
-            result.data[i + 2] = Math.min(255, fabricB * brightness * 1.4);
-            result.data[i + 3] = productA;
-          }
+          // Übertrage mit Produkt-Helligkeit (Chamäleon-Effekt)
+          result.data[i] = Math.min(255, fabricR * brightness * 1.4);
+          result.data[i + 1] = Math.min(255, fabricG * brightness * 1.4);
+          result.data[i + 2] = Math.min(255, fabricB * brightness * 1.4);
+          result.data[i + 3] = productA;
         } else {
           // Original behalten
           result.data[i] = productR;
@@ -322,11 +261,58 @@ export function ProductDetail() {
       }
 
       ctx.putImageData(result, 0, 0);
-      setChameleonImageUrl(canvas.toDataURL());
+
+      // Auto-Crop: Finde die tatsächlichen Grenzen des Bildes (nicht-transparente Pixel)
+      // OPTIMIERT: Prüfe nur jeden 4. Pixel für bessere Performance
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      let minX = canvas.width;
+      let minY = canvas.height;
+      let maxX = 0;
+      let maxY = 0;
+
+      // Finde die Bounding Box des sichtbaren Inhalts (mit Sampling für Performance)
+      const step = 4; // Prüfe nur jeden 4. Pixel
+      for (let y = 0; y < canvas.height; y += step) {
+        for (let x = 0; x < canvas.width; x += step) {
+          const i = (y * canvas.width + x) * 4;
+          const alpha = pixels[i + 3];
+
+          // Pixel ist sichtbar (nicht transparent)
+          if (alpha > 10) {
+            if (x < minX) minX = Math.max(0, x - step);
+            if (x > maxX) maxX = Math.min(canvas.width - 1, x + step);
+            if (y < minY) minY = Math.max(0, y - step);
+            if (y > maxY) maxY = Math.min(canvas.height - 1, y + step);
+          }
+        }
+      }
+
+      // Erstelle ein neues Canvas mit nur dem sichtbaren Inhalt
+      const croppedWidth = maxX - minX + 1;
+      const croppedHeight = maxY - minY + 1;
+
+      if (croppedWidth > 0 && croppedHeight > 0) {
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = croppedWidth;
+        croppedCanvas.height = croppedHeight;
+        const croppedCtx = croppedCanvas.getContext('2d')!;
+
+        // Kopiere nur den sichtbaren Bereich
+        croppedCtx.putImageData(
+          ctx.getImageData(minX, minY, croppedWidth, croppedHeight),
+          0,
+          0
+        );
+
+        setChameleonImageUrl(croppedCanvas.toDataURL());
+      } else {
+        setChameleonImageUrl(canvas.toDataURL());
+      }
     };
 
     applyFabricToProduct().catch(console.error);
-  }, [selectedOuterFabricId, selectedInnerFabricId, allFabrics, product, imageError]);
+  }, [selectedOuterFabricId, allFabrics, product, imageError]);
 
   // Early returns AFTER all hooks
   if (loading) {
@@ -363,9 +349,6 @@ export function ProductDetail() {
     ? allFabrics.find(f => f.id === selectedOuterFabricId)
     : null;
 
-  const selectedInnerFabric = selectedInnerFabricId
-    ? allFabrics.find(f => f.id === selectedInnerFabricId)
-    : null;
 
   const handleAddToCart = () => {
     if (!isAvailable) {
@@ -398,14 +381,6 @@ export function ProductDetail() {
         fabricId: selectedOuterFabric.id,
         fabricName: selectedOuterFabric.name,
         fabricImageUrl: selectedOuterFabric.imageUrl,
-      };
-    }
-
-    if (selectedInnerFabric) {
-      cartItem.selectedInnerFabric = {
-        fabricId: selectedInnerFabric.id,
-        fabricName: selectedInnerFabric.name,
-        fabricImageUrl: selectedInnerFabric.imageUrl,
       };
     }
 
@@ -466,13 +441,6 @@ export function ProductDetail() {
                     <Maximize2 className="h-5 w-5 text-neutral-700" />
                   </button>
                 )}
-
-                {/* Vorschau-Badge */}
-                {selectedOuterFabric && chameleonImageUrl && (
-                  <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
-                    <p className="text-xs text-neutral-600">🎨 mit {selectedOuterFabric.name}</p>
-                  </div>
-                )}
               </div>
 
               {/* Versteckte Bilder für Canvas-Verarbeitung */}
@@ -491,14 +459,6 @@ export function ProductDetail() {
                     crossOrigin="anonymous"
                   />
                 )}
-                {selectedInnerFabric && (
-                  <img
-                    ref={innerFabricImgRef}
-                    src={getImageUrl(selectedInnerFabric.imageUrl, selectedInnerFabric.imageUrlWebp)}
-                    alt="inner fabric"
-                    crossOrigin="anonymous"
-                  />
-                )}
                 {product.maskUrl && (
                   <img
                     ref={maskImgRef}
@@ -511,37 +471,21 @@ export function ProductDetail() {
                 <canvas ref={canvasRef} />
               </div>
 
-              {/* Selected Fabrics Info */}
-              {(selectedOuterFabric || selectedInnerFabric) && (
-                <div className="bg-white rounded-xl shadow-md p-4 space-y-3">
-                  {selectedOuterFabric && (
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={getImageUrl(selectedOuterFabric.imageUrl, selectedOuterFabric.imageUrlWebp)}
-                        alt={selectedOuterFabric.name}
-                        className="w-16 h-16 object-cover rounded-lg border-2 border-primary-200"
-                      />
-                      <div className="flex-1">
-                        <p className="text-xs text-neutral-500">Außenstoff:</p>
-                        <h3 className="font-semibold text-neutral-800">{selectedOuterFabric.name}</h3>
-                        <p className="text-xs text-neutral-600">{selectedOuterFabric.fabricType}</p>
-                      </div>
+              {/* Selected Fabric Info */}
+              {selectedOuterFabric && (
+                <div className="bg-white rounded-xl shadow-md p-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={getImageUrl(selectedOuterFabric.imageUrl, selectedOuterFabric.imageUrlWebp)}
+                      alt={selectedOuterFabric.name}
+                      className="w-16 h-16 object-cover rounded-lg border-2 border-primary-200"
+                    />
+                    <div className="flex-1">
+                      <p className="text-xs text-neutral-500">Gewählter Stoff:</p>
+                      <h3 className="font-semibold text-neutral-800">{selectedOuterFabric.name}</h3>
+                      <p className="text-xs text-neutral-600">{selectedOuterFabric.fabricType}</p>
                     </div>
-                  )}
-                  {selectedInnerFabric && (
-                    <div className="flex items-center gap-3 pt-3 border-t border-gray-200">
-                      <img
-                        src={getImageUrl(selectedInnerFabric.imageUrl, selectedInnerFabric.imageUrlWebp)}
-                        alt={selectedInnerFabric.name}
-                        className="w-16 h-16 object-cover rounded-lg border-2 border-primary-200"
-                      />
-                      <div className="flex-1">
-                        <p className="text-xs text-neutral-500">Innenstoff:</p>
-                        <h3 className="font-semibold text-neutral-800">{selectedInnerFabric.name}</h3>
-                        <p className="text-xs text-neutral-600">{selectedInnerFabric.fabricType}</p>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
             </div>
@@ -562,14 +506,21 @@ export function ProductDetail() {
                 <p className="text-neutral-600 leading-relaxed">{product.description}</p>
               </div>
 
-              {/* Stock Status */}
+              {/* Seller Info */}
+              {product.tailorName && (
+                <div className="flex items-center gap-2">
+                  <span className="text-neutral-600">
+                    Handgefertigt von <span className="font-semibold text-primary-500">{product.tailorName}</span>
+                  </span>
+                </div>
+              )}
+
+              {/* Availability Status */}
               <div className="flex items-center gap-2">
                 {isAvailable ? (
                   <>
                     <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-green-600 font-semibold">
-                      {product.stock} auf Lager
-                    </span>
+                    <span className="text-green-600 font-semibold">Verfügbar</span>
                   </>
                 ) : (
                   <>
@@ -579,14 +530,14 @@ export function ProductDetail() {
                 )}
               </div>
 
-              {/* Outer Fabric Selection */}
+              {/* Fabric Selection */}
               <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
                 <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
                   <span className="text-2xl">🧵</span>
-                  Außenstoff auswählen
+                  Stoff auswählen
                 </h3>
                 <p className="text-sm text-neutral-600">
-                  Wähle den Außenstoff für dein Produkt.
+                  Wähle den Stoff für dein Produkt.
                 </p>
 
                 {/* Fabric Grid Selection with Thumbnails */}
@@ -662,68 +613,6 @@ export function ProductDetail() {
                 )}
               </div>
 
-              {/* Inner Fabric Selection */}
-              <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-                <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
-                  <span className="text-2xl">🧶</span>
-                  Innenstoff auswählen (optional)
-                </h3>
-                <p className="text-sm text-neutral-600">
-                  Wähle optional einen Innenstoff für dein Produkt.
-                </p>
-
-                {/* Fabric Grid Selection with Thumbnails */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-y-auto">
-                  {/* Option for no fabric */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedInnerFabricId(null)}
-                    className={cn(
-                      'relative aspect-square rounded-lg border-3 transition-all overflow-hidden',
-                      selectedInnerFabricId === null
-                        ? 'border-primary-400 ring-2 ring-primary-400 ring-offset-2'
-                        : 'border-gray-200 hover:border-primary-300'
-                    )}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                      <span className="text-3xl">✖️</span>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1.5 text-center">
-                      Kein Innenstoff
-                    </div>
-                  </button>
-
-                  {/* Fabric options with thumbnails */}
-                  {allFabrics.map(fabric => (
-                    <button
-                      type="button"
-                      key={fabric.id}
-                      onClick={() => setSelectedInnerFabricId(fabric.id)}
-                      className={cn(
-                        'relative aspect-square rounded-lg border-3 transition-all overflow-hidden',
-                        selectedInnerFabricId === fabric.id
-                          ? 'border-primary-400 ring-2 ring-primary-400 ring-offset-2'
-                          : 'border-gray-200 hover:border-primary-300'
-                      )}
-                      title={`${fabric.name} - ${fabric.fabricType}`}
-                    >
-                      <img
-                        src={getImageUrl(fabric.thumbnailUrl || fabric.imageUrl, fabric.imageUrlWebp)}
-                        alt={fabric.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1.5 text-center line-clamp-2">
-                        {fabric.name}
-                      </div>
-                      {selectedInnerFabricId === fabric.id && (
-                        <div className="absolute top-2 right-2 bg-primary-400 text-white rounded-full p-1">
-                          <Check className="h-4 w-4" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               {/* Size Selection */}
               {product.sizeType && product.sizeType !== 'oneSize' && (
@@ -834,7 +723,6 @@ export function ProductDetail() {
               <div className="mt-4 text-center">
                 <p className="text-white text-sm">
                   🎨 {product.name} mit {selectedOuterFabric.name}
-                  {selectedInnerFabric && ` & ${selectedInnerFabric.name} (innen)`}
                 </p>
               </div>
             )}

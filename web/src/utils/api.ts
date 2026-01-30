@@ -277,6 +277,9 @@ export const patternsApi = {
     sizeFormatted: string;
     createdAt: string;
     modifiedAt: string;
+    hasThumbnail: boolean;
+    thumbnailUrl: string | null;
+    tailorId: string | null;
   }>>> => {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
@@ -285,12 +288,54 @@ export const patternsApi = {
     return data;
   },
 
+  getThumbnailUrl: (id: string): string => {
+    return `/api/patterns/${id}/thumbnail`;
+  },
+
   getPreviewUrl: (id: string): string => {
     return `/api/patterns/${id}/preview`;
   },
 
   getDownloadUrl: async (id: string): Promise<string> => {
     return `/api/patterns/${id}/download`;
+  },
+
+  upload: async (file: File): Promise<ApiResponse<{
+    id: string;
+    filename: string;
+    name: string;
+    type: string;
+    size: number;
+    sizeFormatted: string;
+  }>> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await api.post('/patterns/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  uploadThumbnail: async (id: string, file: File): Promise<ApiResponse<{ thumbnailUrl: string }>> => {
+    const formData = new FormData();
+    formData.append('thumbnail', file);
+    const { data } = await api.post(`/patterns/${id}/thumbnail`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  setThumbnailUrl: async (id: string, thumbnailUrl: string): Promise<ApiResponse<{ thumbnailUrl: string | null }>> => {
+    const { data } = await api.put(`/patterns/${id}/thumbnail-url`, { thumbnailUrl });
+    return data;
+  },
+
+  deleteThumbnail: async (id: string): Promise<void> => {
+    await api.delete(`/patterns/${id}/thumbnail`);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/patterns/${id}`);
   },
 
   createShareLink: async (id: string): Promise<ApiResponse<{
@@ -315,6 +360,256 @@ export const patternsApi = {
 
   deleteShare: async (token: string): Promise<void> => {
     await api.delete(`/patterns/shares/${token}`);
+  },
+
+  sync: async (): Promise<ApiResponse<{
+    added: number;
+    skipped: number;
+    total: number;
+  }>> => {
+    const { data } = await api.post('/patterns/sync');
+    return data;
+  },
+};
+
+// Tailors API (Schneider)
+export const tailorsApi = {
+  getAll: async (): Promise<ApiResponse<Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    logo_url: string | null;
+  }>>> => {
+    const { data } = await api.get('/tailors');
+    return data;
+  },
+
+  getBySlug: async (slug: string): Promise<ApiResponse<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    logo_url: string | null;
+  }>> => {
+    const { data } = await api.get(`/tailors/${slug}`);
+    return data;
+  },
+
+  getAdmin: async (): Promise<ApiResponse<Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    logo_url: string | null;
+    contact_email: string | null;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  }>>> => {
+    const { data } = await api.get('/tailors/admin/all');
+    return data;
+  },
+
+  create: async (tailor: {
+    name: string;
+    slug: string;
+    description?: string;
+    logo_url?: string;
+    contact_email?: string;
+    is_active?: boolean;
+  }): Promise<ApiResponse<any>> => {
+    const { data } = await api.post('/tailors', tailor);
+    return data;
+  },
+
+  update: async (id: string, updates: {
+    name?: string;
+    slug?: string;
+    description?: string;
+    logo_url?: string;
+    contact_email?: string;
+    is_active?: boolean;
+  }): Promise<ApiResponse<any>> => {
+    const { data } = await api.put(`/tailors/${id}`, updates);
+    return data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/tailors/${id}`);
+  },
+
+  // Admin: Ausstehende Registrierungen
+  getPending: async (): Promise<ApiResponse<any[]>> => {
+    const { data } = await api.get('/tailor-auth/admin/pending');
+    return data;
+  },
+
+  approve: async (id: string): Promise<ApiResponse<any>> => {
+    const { data } = await api.post(`/tailor-auth/admin/${id}/approve`);
+    return data;
+  },
+
+  reject: async (id: string, reason?: string): Promise<ApiResponse<any>> => {
+    const { data } = await api.post(`/tailor-auth/admin/${id}/reject`, { reason });
+    return data;
+  },
+
+  setPassword: async (id: string, username: string, password: string): Promise<ApiResponse<any>> => {
+    const { data } = await api.post(`/tailor-auth/admin/${id}/set-password`, { username, password });
+    return data;
+  },
+};
+
+// Tailor Auth API (Schneider-Authentifizierung)
+export const tailorAuthApi = {
+  register: async (data: {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    description?: string;
+  }): Promise<ApiResponse<{ message: string; tailorId: string }>> => {
+    const response = await api.post('/tailor-auth/register', data);
+    return response.data;
+  },
+
+  login: async (username: string, password: string): Promise<ApiResponse<{
+    tailor: {
+      id: string;
+      name: string;
+      slug: string;
+      username: string;
+      email: string;
+      description: string | null;
+      logoUrl: string | null;
+    };
+    token: string;
+  }>> => {
+    const response = await api.post('/tailor-auth/login', { username, password });
+    return response.data;
+  },
+
+  logout: async (): Promise<void> => {
+    await api.post('/tailor-auth/logout');
+  },
+
+  verify: async (): Promise<boolean> => {
+    try {
+      const { data } = await api.get('/tailor-auth/verify');
+      return data.data?.valid || false;
+    } catch {
+      return false;
+    }
+  },
+
+  getMe: async (): Promise<{
+    id: string;
+    name: string;
+    slug: string;
+    username: string;
+    email: string;
+    description: string | null;
+    logoUrl: string | null;
+  } | null> => {
+    try {
+      const { data } = await api.get('/tailor-auth/me');
+      return data.data || null;
+    } catch {
+      return null;
+    }
+  },
+
+  // Eigene Produkte des eingeloggten Verkäufers
+  getMyProducts: async (): Promise<ApiResponse<Array<{
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    imageUrl: string | null;
+    isFeatured: boolean;
+  }>>> => {
+    const { data } = await api.get('/tailor-auth/my-products');
+    return data;
+  },
+
+  // Eigene Schnittmuster des eingeloggten Verkäufers
+  getMyPatterns: async (): Promise<ApiResponse<Array<{
+    id: string;
+    filename: string;
+    name: string;
+    type: 'pdf' | 'zip';
+    size: number;
+    sizeFormatted: string;
+    createdAt: string;
+    modifiedAt: string;
+    hasThumbnail: boolean;
+    thumbnailUrl: string | null;
+  }>>> => {
+    const { data } = await api.get('/tailor-auth/my-patterns');
+    return data;
+  },
+
+  // Neues Produkt erstellen
+  createProduct: async (formData: FormData): Promise<ApiResponse<{
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    imageUrl: string | null;
+    isFeatured: boolean;
+  }>> => {
+    const { data } = await api.post('/tailor-auth/my-products', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  // Produkt bearbeiten
+  updateProduct: async (id: string, formData: FormData): Promise<ApiResponse<{
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    imageUrl: string | null;
+    isFeatured: boolean;
+  }>> => {
+    const { data } = await api.put(`/tailor-auth/my-products/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  // Produkt löschen
+  deleteProduct: async (id: string): Promise<void> => {
+    await api.delete(`/tailor-auth/my-products/${id}`);
+  },
+
+  // Schnittmuster hochladen
+  uploadPattern: async (file: File, name?: string): Promise<ApiResponse<{
+    id: string;
+    filename: string;
+    name: string;
+    type: 'pdf' | 'zip';
+    sizeFormatted: string;
+    hasThumbnail: boolean;
+    thumbnailUrl: string | null;
+  }>> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (name) formData.append('name', name);
+    const { data } = await api.post('/tailor-auth/my-patterns', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  // Schnittmuster löschen
+  deletePattern: async (id: string): Promise<void> => {
+    await api.delete(`/tailor-auth/my-patterns/${id}`);
   },
 };
 
