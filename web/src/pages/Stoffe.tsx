@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Info, Loader2, Palette, Search, Filter } from 'lucide-react';
+import { Loader2, Palette, Search, Filter, Mail, Scissors, User } from 'lucide-react';
 import { fabricsApi } from '@/utils/api';
 import { getImageUrl } from '@/utils/helpers';
 import type { Fabric } from '@/types';
@@ -11,6 +11,7 @@ export function Stoffe() {
   const [selectedFabric, setSelectedFabric] = useState<Fabric | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedTailor, setSelectedTailor] = useState<string>('all');
 
   useEffect(() => {
     loadFabrics();
@@ -33,7 +34,18 @@ export function Stoffe() {
     return ['all', ...Array.from(types)];
   }, [fabrics]);
 
-  // Filter fabrics based on search and type
+  // Get unique tailors for filter
+  const tailors = useMemo(() => {
+    const tailorMap = new Map<string, string>();
+    fabrics.forEach(f => {
+      if (f.tailorId && f.tailorName) {
+        tailorMap.set(f.tailorId, f.tailorName);
+      }
+    });
+    return [{ id: 'all', name: 'Alle Verkäufer' }, ...Array.from(tailorMap.entries()).map(([id, name]) => ({ id, name }))];
+  }, [fabrics]);
+
+  // Filter fabrics based on search, type, and tailor
   const filteredFabrics = useMemo(() => {
     return fabrics.filter(fabric => {
       // Search filter
@@ -42,22 +54,26 @@ export function Stoffe() {
         fabric.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         fabric.fabricType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         fabric.color?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fabric.material?.toLowerCase().includes(searchTerm.toLowerCase());
+        fabric.material?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fabric.tailorName?.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Type filter
       const matchesType = selectedType === 'all' || fabric.fabricType === selectedType;
 
-      return matchesSearch && matchesType;
+      // Tailor filter
+      const matchesTailor = selectedTailor === 'all' || fabric.tailorId === selectedTailor;
+
+      return matchesSearch && matchesType && matchesTailor;
     });
-  }, [fabrics, searchTerm, selectedType]);
+  }, [fabrics, searchTerm, selectedType, selectedTailor]);
 
   return (
     <>
       <Helmet>
-        <title>Hochwertige Stoffe - Jersey, Baumwolle, Fleece | Henkes Stoffzauber</title>
+        <title>Stoffe unserer Verkäufer - Jersey, Baumwolle, Fleece | Henkes Stoffzauber</title>
         <meta
           name="description"
-          content="Entdecken Sie unsere Stoffauswahl: Jersey, Baumwolle, Fleece, Softshell und mehr. Hochwertige Materialien für Ihre Nähprojekte - sorgfältig ausgewählt und geprüft."
+          content="Entdecken Sie die Stoffauswahl unserer Verkäufer: Jersey, Baumwolle, Fleece, Softshell und mehr. Hochwertige Materialien - lassen Sie sich Ihr Wunschprodukt anfertigen!"
         />
         <link rel="canonical" href="https://henkes-stoffzauber.de/stoffe" />
       </Helmet>
@@ -78,28 +94,33 @@ export function Stoffe() {
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl font-bold text-neutral-800 mb-4 drop-shadow-sm">
-              Unsere Stoffe
+              Stoffe unserer Verkäufer
             </h1>
             <p className="text-neutral-800 max-w-2xl mx-auto drop-shadow-sm">
-              Hochwertige Materialien. Jeder Stoff
-              wird sorgfältig ausgewählt.
+              Entdecken Sie hochwertige Stoffe von unseren talentierten Verkäufern.
+              Lassen Sie sich Ihr Wunschprodukt daraus anfertigen!
             </p>
           </div>
         </div>
 
-        {/* Info Banner */}
+        {/* Info Banner - Anfertigung */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-secondary-50 rounded-xl p-6 flex items-start gap-4">
-            <Info className="h-6 w-6 text-secondary-600 flex-shrink-0 mt-1" />
-            <div>
-              <h2 className="font-semibold text-neutral-800 mb-1">
-                Stoffauswahl bei Bestellung
-              </h2>
-              <p className="text-neutral-600 text-sm">
-                Viele unserer Produkte können aus verschiedenen Stoffen gefertigt
-                werden. Bei der Bestellung können Sie Ihren Wunschstoff angeben.
-                Kontaktieren Sie uns gerne für individuelle Anfragen!
-              </p>
+          <div className="bg-primary-50 border border-primary-200 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <Scissors className="h-8 w-8 text-primary-600 flex-shrink-0 mt-1" />
+              <div>
+                <h2 className="font-semibold text-neutral-800 text-lg mb-2">
+                  Individuelle Anfertigung möglich!
+                </h2>
+                <p className="text-neutral-700 mb-3">
+                  Gefällt Ihnen ein Stoff? Unsere Verkäufer fertigen gerne ein Produkt
+                  Ihrer Wahl aus diesem Stoff für Sie an. Kontaktieren Sie den jeweiligen
+                  Verkäufer direkt per E-Mail, um Ihr Wunschprodukt zu besprechen.
+                </p>
+                <p className="text-neutral-600 text-sm">
+                  Klicken Sie auf einen Stoff, um die Kontaktdaten des Verkäufers zu sehen.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -107,7 +128,7 @@ export function Stoffe() {
         {/* Search and Filter */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               {/* Search */}
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -120,8 +141,8 @@ export function Stoffe() {
                 />
               </div>
 
-              {/* Filter */}
-              <div className="md:w-64">
+              {/* Type Filter */}
+              <div className="lg:w-56">
                 <div className="relative">
                   <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
                   <select
@@ -133,6 +154,25 @@ export function Stoffe() {
                     {fabricTypes.map(type => (
                       <option key={type} value={type}>
                         {type === 'all' ? 'Alle Stoffarten' : type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Tailor Filter */}
+              <div className="lg:w-56">
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                  <select
+                    value={selectedTailor}
+                    onChange={(e) => setSelectedTailor(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all appearance-none bg-white cursor-pointer"
+                    aria-label="Verkäufer filtern"
+                  >
+                    {tailors.map(tailor => (
+                      <option key={tailor.id} value={tailor.id}>
+                        {tailor.name}
                       </option>
                     ))}
                   </select>
@@ -198,6 +238,11 @@ export function Stoffe() {
                     <p className="text-sm text-primary-500 font-medium mb-2">
                       {fabric.fabricType}
                     </p>
+                    {fabric.tailorName && (
+                      <p className="text-sm text-neutral-500 mb-2">
+                        von {fabric.tailorName}
+                      </p>
+                    )}
                     <p className="text-neutral-600 line-clamp-2">
                       {fabric.description}
                     </p>
@@ -253,6 +298,11 @@ export function Stoffe() {
                     <p className="text-primary-500 font-medium">
                       {selectedFabric.fabricType}
                     </p>
+                    {selectedFabric.tailorName && (
+                      <p className="text-neutral-500 text-sm mt-1">
+                        Angeboten von: {selectedFabric.tailorName}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -280,7 +330,7 @@ export function Stoffe() {
                   {selectedFabric.description}
                 </p>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 mb-6">
                   {selectedFabric.material && (
                     <div className="bg-neutral-50 rounded-lg p-3">
                       <p className="text-xs text-neutral-500 mb-1">Material</p>
@@ -314,6 +364,27 @@ export function Stoffe() {
                     </div>
                   )}
                 </div>
+
+                {/* Anfertigung CTA */}
+                {selectedFabric.tailorEmail && (
+                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-neutral-800 mb-2 flex items-center gap-2">
+                      <Scissors className="h-5 w-5 text-primary-500" />
+                      Produkt aus diesem Stoff anfertigen lassen?
+                    </h3>
+                    <p className="text-neutral-600 text-sm mb-3">
+                      Kontaktieren Sie {selectedFabric.tailorName} direkt, um Ihr
+                      Wunschprodukt aus diesem Stoff anfertigen zu lassen.
+                    </p>
+                    <a
+                      href={`mailto:${selectedFabric.tailorEmail}?subject=Anfrage: Anfertigung aus Stoff "${selectedFabric.name}"&body=Hallo ${selectedFabric.tailorName},%0A%0Aich interessiere mich für eine Anfertigung aus dem Stoff "${selectedFabric.name}".%0A%0AMein Wunschprodukt:%0A%0AMit freundlichen Grüßen`}
+                      className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                    >
+                      <Mail className="h-4 w-4" />
+                      {selectedFabric.tailorEmail}
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -323,16 +394,16 @@ export function Stoffe() {
         <div className="bg-primary-400 py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-white mb-4">
-              Haben Sie einen besonderen Stoffwunsch?
+              Sie sind Verkäufer und möchten Ihre Stoffe präsentieren?
             </h2>
             <p className="text-white/90 mb-6">
-              Kontaktieren Sie uns - wir beraten Sie gerne!
+              Registrieren Sie sich als Verkäufer und zeigen Sie Ihre Stoffauswahl!
             </p>
             <a
-              href="mailto:info@henkes-stoffzauber.de"
+              href="/verkaeufer/registrieren"
               className="inline-block bg-white text-primary-500 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
             >
-              Kontakt aufnehmen
+              Jetzt Verkäufer werden
             </a>
           </div>
         </div>

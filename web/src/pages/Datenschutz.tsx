@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Shield, Lock, Database, Mail } from 'lucide-react';
+import { Shield, Lock, Database, Mail, Users } from 'lucide-react';
 
 export function Datenschutz() {
   return (
@@ -30,7 +30,7 @@ export function Datenschutz() {
                 </h3>
                 <p className="text-neutral-700">
                   Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren
-                  personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene
+                  personenbezogenen Daten passiert, wenn Sie diesen Marktplatz nutzen. Personenbezogene
                   Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.
                 </p>
               </section>
@@ -38,21 +38,18 @@ export function Datenschutz() {
               {/* Verantwortliche Stelle */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  2. Verantwortliche Stelle
+                  2. Verantwortliche Stelle (Plattformbetreiber)
                 </h2>
                 <div className="bg-primary-50 rounded-lg p-6">
                   <p className="text-neutral-700 font-medium mb-2">
-                    Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:
+                    Die verantwortliche Stelle für die Datenverarbeitung auf dieser Plattform ist:
                   </p>
                   <div className="text-neutral-700 space-y-1">
                     <p className="font-semibold">Stefan Henke</p>
-                    <p>Henkes Stoffzauber</p>
+                    <p>Henkes Stoffzauber - Marktplatz für handgenähte Unikate</p>
                     <p>Rheinstraße 40</p>
                     <p>47495 Rheinberg</p>
                     <p className="mt-3">
-                      
-                    </p>
-                    <p>
                       <span className="font-medium">E-Mail:</span>{' '}
                       <a
                         href="mailto:info@henkes-stoffzauber.de"
@@ -65,10 +62,38 @@ export function Datenschutz() {
                 </div>
               </section>
 
+              {/* Hinweis zur Plattform */}
+              <section>
+                <h2 className="text-2xl font-semibold text-neutral-800 mb-4 flex items-center gap-2">
+                  <Users className="h-6 w-6 text-primary-500" />
+                  3. Hinweis zum Marktplatz-Modell
+                </h2>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+                  <p className="text-neutral-700 mb-3">
+                    Henkes Stoffzauber ist ein Marktplatz, auf dem unabhängige Verkäufer ihre
+                    selbstgenähten Produkte anbieten. Bei einer Bestellung werden Ihre Daten wie folgt verarbeitet:
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 text-neutral-700 ml-4">
+                    <li>
+                      <strong>Plattformbetreiber (wir):</strong> Verarbeitet Ihre Daten für die
+                      Abwicklung der Bestellung, Zahlungsabwicklung und Kundenservice
+                    </li>
+                    <li>
+                      <strong>Verkäufer:</strong> Erhält die für den Versand notwendigen Daten
+                      (Name, Lieferadresse) zur Auftragserfüllung
+                    </li>
+                  </ul>
+                  <p className="text-neutral-700 mt-3">
+                    Die Verkäufer sind verpflichtet, Ihre Daten nur für die Auftragsabwicklung zu
+                    verwenden und die geltenden Datenschutzbestimmungen einzuhalten.
+                  </p>
+                </div>
+              </section>
+
               {/* Datenerfassung */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  3. Datenerfassung auf dieser Website
+                  4. Datenerfassung auf dieser Plattform
                 </h2>
 
                 <div className="space-y-6">
@@ -78,7 +103,7 @@ export function Datenschutz() {
                       Welche Daten erfassen wir?
                     </h3>
                     <p className="text-neutral-700 mb-3">
-                      Wir erfassen verschiedene Daten, wenn Sie unsere Website nutzen:
+                      Wir erfassen verschiedene Daten, wenn Sie unsere Plattform nutzen:
                     </p>
                     <ul className="list-disc list-inside space-y-2 text-neutral-700 ml-4">
                       <li>
@@ -90,8 +115,11 @@ export function Datenschutz() {
                         bestellte Produkte
                       </li>
                       <li>
-                        <strong>Kontaktdaten:</strong> Wenn Sie uns per E-Mail oder WhatsApp
-                        kontaktieren
+                        <strong>Kontaktdaten:</strong> Wenn Sie uns per E-Mail kontaktieren
+                      </li>
+                      <li>
+                        <strong>Verkäufer-Daten:</strong> Bei Registrierung als Verkäufer zusätzlich
+                        Geschäftsdaten und Bankverbindung für Auszahlungen
                       </li>
                     </ul>
                   </div>
@@ -106,9 +134,11 @@ export function Datenschutz() {
                     </p>
                     <ul className="list-disc list-inside space-y-2 text-neutral-700 ml-4">
                       <li>Bearbeitung und Abwicklung Ihrer Bestellungen</li>
+                      <li>Weitergabe an Verkäufer für den Versand</li>
                       <li>Versand von Bestellbestätigungen und Rechnungen</li>
                       <li>Beantwortung Ihrer Anfragen</li>
-                      <li>Gewährleistung der technischen Sicherheit der Website</li>
+                      <li>Gewährleistung der technischen Sicherheit der Plattform</li>
+                      <li>Verwaltung von Verkäufer-Konten und Auszahlungen</li>
                     </ul>
                   </div>
                 </div>
@@ -117,10 +147,10 @@ export function Datenschutz() {
               {/* Hosting */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  4. Hosting
+                  5. Hosting
                 </h2>
                 <p className="text-neutral-700 mb-3">
-                  Diese Website wird bei euserv gehostet. Der Anbieter ist:
+                  Diese Plattform wird bei euserv gehostet. Der Anbieter ist:
                 </p>
                 <div className="bg-neutral-100 rounded-lg p-4 text-neutral-700">
                   <p className="font-medium">euserv GmbH</p>
@@ -129,7 +159,7 @@ export function Datenschutz() {
                   <p>Deutschland</p>
                 </div>
                 <p className="text-neutral-700 mt-3">
-                  Wenn Sie unsere Website besuchen, werden Ihre Daten auf den Servern von euserv
+                  Wenn Sie unsere Plattform besuchen, werden Ihre Daten auf den Servern von euserv
                   verarbeitet. Dies kann auch IP-Adressen, Kontaktanfragen und Meta- und
                   Kommunikationsdaten umfassen. Die Nutzung erfolgt auf Grundlage von Art. 6 Abs. 1
                   lit. f DSGVO (berechtigtes Interesse).
@@ -139,13 +169,13 @@ export function Datenschutz() {
               {/* PayPal */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  5. Zahlungsdienstleister
+                  6. Zahlungsdienstleister
                 </h2>
                 <h3 className="text-xl font-semibold text-neutral-800 mb-3">
                   PayPal
                 </h3>
                 <p className="text-neutral-700">
-                  Auf dieser Website bieten wir die Bezahlung via PayPal an. Anbieter dieses
+                  Auf dieser Plattform bieten wir die Bezahlung via PayPal an. Anbieter dieses
                   Zahlungsdienstes ist die PayPal (Europe) S.à.r.l. et Cie, S.C.A., 22-24 Boulevard
                   Royal, L-2449 Luxembourg (im Folgenden "PayPal").
                 </p>
@@ -160,24 +190,26 @@ export function Datenschutz() {
               {/* Cookies */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  6. Cookies
+                  7. Cookies
                 </h2>
                 <p className="text-neutral-700">
-                  Unsere Website verwendet derzeit keine Cookies für Tracking oder Analyse-Zwecke.
-                  Es werden lediglich technisch notwendige Session-Cookies verwendet, um die
-                  Funktionalität der Website sicherzustellen (z.B. Warenkorb-Funktion).
+                  Unsere Plattform verwendet technisch notwendige Cookies, um die
+                  Funktionalität sicherzustellen:
                 </p>
-                <p className="text-neutral-700 mt-2">
+                <ul className="list-disc list-inside space-y-2 text-neutral-700 ml-4 mt-3">
+                  <li>Session-Cookies für die Warenkorb-Funktion</li>
+                  <li>Authentifizierungs-Cookies für Verkäufer-Logins</li>
+                </ul>
+                <p className="text-neutral-700 mt-3">
                   Diese technisch notwendigen Cookies werden auf Grundlage von Art. 6 Abs. 1 lit. f
-                  DSGVO eingesetzt. Unser berechtigtes Interesse liegt in der Bereitstellung der
-                  Website-Funktionalität.
+                  DSGVO eingesetzt. Es werden keine Tracking- oder Analyse-Cookies verwendet.
                 </p>
               </section>
 
               {/* Analyse Tools */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  7. Analyse-Tools und Werbung
+                  8. Analyse-Tools und Werbung
                 </h2>
                 <p className="text-neutral-700">
                   Wir verwenden derzeit <strong>keine</strong> Analyse-Tools wie Google Analytics,
@@ -190,20 +222,19 @@ export function Datenschutz() {
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4 flex items-center gap-2">
                   <Mail className="h-6 w-6 text-primary-500" />
-                  8. Newsletter
+                  9. Newsletter
                 </h2>
                 <p className="text-neutral-700">
                   Aktuell bieten wir noch keinen Newsletter-Service an. Sollten wir in Zukunft einen
-                  Newsletter anbieten (voraussichtlich über Mailchimp), werden wir Sie vorab um Ihre
-                  ausdrückliche Einwilligung bitten und Sie in dieser Datenschutzerklärung
-                  entsprechend informieren.
+                  Newsletter anbieten, werden wir Sie vorab um Ihre ausdrückliche Einwilligung bitten
+                  und Sie in dieser Datenschutzerklärung entsprechend informieren.
                 </p>
               </section>
 
               {/* Ihre Rechte */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  9. Ihre Rechte
+                  10. Ihre Rechte
                 </h2>
                 <p className="text-neutral-700 mb-3">
                   Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:
@@ -243,12 +274,12 @@ export function Datenschutz() {
               {/* SSL-Verschlüsselung */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  10. SSL- bzw. TLS-Verschlüsselung
+                  11. SSL- bzw. TLS-Verschlüsselung
                 </h2>
                 <p className="text-neutral-700">
-                  Diese Seite nutzt aus Sicherheitsgründen und zum Schutz der Übertragung
+                  Diese Plattform nutzt aus Sicherheitsgründen und zum Schutz der Übertragung
                   vertraulicher Inhalte, wie zum Beispiel Bestellungen oder Anfragen, die Sie an uns
-                  als Seitenbetreiber senden, eine SSL- bzw. TLS-Verschlüsselung. Eine
+                  als Plattformbetreiber senden, eine SSL- bzw. TLS-Verschlüsselung. Eine
                   verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des Browsers
                   von "http://" auf "https://" wechselt und an dem Schloss-Symbol in Ihrer
                   Browserzeile.
@@ -258,7 +289,7 @@ export function Datenschutz() {
               {/* Datenlöschung */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  11. Speicherdauer
+                  12. Speicherdauer
                 </h2>
                 <p className="text-neutral-700">
                   Wir speichern personenbezogene Daten nur so lange, wie dies für die Erfüllung der
@@ -278,11 +309,10 @@ export function Datenschutz() {
                   Fragen zum Datenschutz?
                 </h2>
                 <p className="text-neutral-700 mb-3">
-                  Wenn Sie Fragen zum Datenschutz haben, schreiben Sie uns bitte eine E-Mail oder
-                  wenden Sie sich direkt an uns:
+                  Wenn Sie Fragen zum Datenschutz haben, schreiben Sie uns bitte eine E-Mail:
                 </p>
                 <div className="text-neutral-700">
-                  <p className="font-semibold">Stefan Henke</p>
+                  <p className="font-semibold">Stefan Henke (Plattformbetreiber)</p>
                   <p>
                     E-Mail:{' '}
                     <a
@@ -292,13 +322,12 @@ export function Datenschutz() {
                       info@henkes-stoffzauber.de
                     </a>
                   </p>
-                  
                 </div>
               </section>
 
               {/* Stand */}
               <section className="text-sm text-neutral-500 border-t pt-6">
-                <p>Stand: Dezember 2024</p>
+                <p>Stand: Januar 2026</p>
               </section>
             </div>
           </div>

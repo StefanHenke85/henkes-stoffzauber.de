@@ -17,14 +17,14 @@ export function Impressum() {
             </h1>
 
             <div className="space-y-8">
-              {/* Angaben gemäß § 5 TMG */}
+              {/* Plattformbetreiber */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
-                  Angaben gemäß § 5 TMG
+                  Plattformbetreiber (Angaben gemäß § 5 TMG)
                 </h2>
                 <div className="space-y-2 text-neutral-700">
                   <p className="font-medium text-lg">Stefan Henke</p>
-                  <p>Henkes Stoffzauber</p>
+                  <p>Henkes Stoffzauber - Marktplatz für handgenähte Unikate</p>
                   <div className="flex items-start gap-2 mt-4">
                     <MapPin className="h-5 w-5 text-primary-500 mt-0.5 flex-shrink-0" />
                     <div>
@@ -42,7 +42,6 @@ export function Impressum() {
                   Kontakt
                 </h2>
                 <div className="space-y-3 text-neutral-700">
-              
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-primary-500" />
                     <a
@@ -55,6 +54,19 @@ export function Impressum() {
                 </div>
               </section>
 
+              {/* Hinweis zur Plattform */}
+              <section className="bg-primary-50 rounded-xl p-6 border border-primary-200">
+                <h2 className="text-xl font-semibold text-neutral-800 mb-3">
+                  Hinweis zur Plattform
+                </h2>
+                <p className="text-neutral-700">
+                  Henkes Stoffzauber ist ein Marktplatz, der unabhängigen Verkäufern die Möglichkeit bietet,
+                  ihre selbstgenähten Produkte anzubieten. Die einzelnen Verkäufer sind für ihre
+                  Produktbeschreibungen, Preise und die Abwicklung ihrer Bestellungen selbst verantwortlich.
+                  Bei Fragen zu einem bestimmten Produkt wenden Sie sich bitte direkt an den jeweiligen Verkäufer.
+                </p>
+              </section>
+
               {/* Umsatzsteuer */}
               <section>
                 <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
@@ -62,6 +74,10 @@ export function Impressum() {
                 </h2>
                 <p className="text-neutral-700">
                   Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).
+                </p>
+                <p className="text-neutral-700 mt-2">
+                  Hinweis: Die auf der Plattform registrierten Verkäufer sind ggf. eigenständig umsatzsteuerpflichtig
+                  und weisen dies in ihren Rechnungen entsprechend aus.
                 </p>
               </section>
 
@@ -115,18 +131,16 @@ export function Impressum() {
                   Haftung für Inhalte
                 </h2>
                 <p className="text-neutral-700">
-                  Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen
+                  Als Plattformbetreiber sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen
                   Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind
                   wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte
                   fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine
                   rechtswidrige Tätigkeit hinweisen.
                 </p>
                 <p className="text-neutral-700 mt-2">
-                  Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach
-                  den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung
-                  ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung
-                  möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese
-                  Inhalte umgehend entfernen.
+                  Für die von Verkäufern eingestellten Produktinhalte und -beschreibungen sind die
+                  jeweiligen Verkäufer selbst verantwortlich. Bei Bekanntwerden von Rechtsverletzungen
+                  werden wir diese Inhalte umgehend entfernen.
                 </p>
               </section>
 
@@ -149,8 +163,9 @@ export function Impressum() {
                   Urheberrecht
                 </h2>
                 <p className="text-neutral-700">
-                  Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten
-                  unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung,
+                  Die durch den Plattformbetreiber erstellten Inhalte und Werke auf diesen Seiten
+                  unterliegen dem deutschen Urheberrecht. Die Produktbilder und -beschreibungen der
+                  Verkäufer sind Eigentum der jeweiligen Verkäufer. Die Vervielfältigung, Bearbeitung,
                   Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes
                   bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
                 </p>

@@ -70,6 +70,7 @@ export interface DbFabric {
   width: number | null;
   is_active: boolean;
   is_featured: boolean;
+  tailor_id: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -112,6 +112,9 @@ export interface Fabric {
   width?: number;
   isActive: boolean;
   isFeatured: boolean;
+  tailorId?: string;
+  tailorName?: string;
+  tailorEmail?: string;
   createdAt?: string;
   updatedAt?: string;
 }

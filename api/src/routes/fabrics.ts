@@ -21,7 +21,13 @@ router.get('/', async (_req: Request, res: Response<ApiResponse>) => {
   try {
     const { data: fabrics, error } = await supabase
       .from('fabrics')
-      .select('*')
+      .select(`
+        *,
+        tailors:tailor_id (
+          name,
+          contact_email
+        )
+      `)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -33,9 +39,19 @@ router.get('/', async (_req: Request, res: Response<ApiResponse>) => {
       });
     }
 
+    // Transform and add tailor info
+    const fabricsWithTailor = fabrics.map((fabric: any) => {
+      const transformed = transformDbToApi(fabric);
+      if (fabric.tailors) {
+        transformed.tailorName = fabric.tailors.name;
+        transformed.tailorEmail = fabric.tailors.contact_email;
+      }
+      return transformed;
+    });
+
     res.json({
       success: true,
-      data: transformDbToApi(fabrics),
+      data: fabricsWithTailor,
     });
   } catch (error) {
     logger.error('Get fabrics error:', error);

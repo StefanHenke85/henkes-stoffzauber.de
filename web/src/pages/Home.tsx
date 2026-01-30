@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, Sparkles, Heart, Truck } from 'lucide-react';
+import { ArrowRight, Sparkles, Heart, Truck, Users } from 'lucide-react';
 import { productsApi } from '@/utils/api';
 import { ProductCard } from '@/components/ProductCard';
 import type { Product } from '@/types';
@@ -28,10 +28,10 @@ export function Home() {
   return (
     <>
       <Helmet>
-        <title>Henkes Stoffzauber - Nähkreationen aus Rheinberg</title>
+        <title>Henkes Stoffzauber - Marktplatz für handgenähte Unikate</title>
         <meta
           name="description"
-          content="Hochwertige handgefertigte Stoffprodukte aus Rheinberg. Mützen, Schals, Loops und individuelle Nähkreationen. Kostenloser Versand ab 50€."
+          content="Marktplatz für handgefertigte Nähkreationen. Entdecke einzigartige Mützen, Schals, Loops und mehr von talentierten Näherinnen und Nähern. Jedes Stück ein Unikat!"
         />
         <link rel="canonical" href="https://henkes-stoffzauber.de/" />
       </Helmet>
@@ -64,22 +64,22 @@ export function Home() {
                 <span className="text-primary-500">Henkes Stoffzauber</span>
               </h1>
               <p className="text-lg md:text-xl text-neutral-800 mb-8 max-w-2xl drop-shadow-sm">
-                Entdecken Sie hochwertige Stoffe, kreative Ideen und liebevoll
-                gefertigte Produkte.
+                Dein Marktplatz für handgenähte Unikate. Entdecke einzigartige
+                Kreationen von talentierten Näherinnen und Nähern aus der Region.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link
                   to="/shop"
                   className="inline-flex items-center justify-center gap-2 bg-primary-400 text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-primary-500 hover:-translate-y-1 transition-all shadow-lg"
                 >
-                  Zum Shop
+                  Unikate entdecken
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <Link
-                  to="/stoffe"
+                  to="/verkaeufer/registrieren"
                   className="inline-flex items-center justify-center gap-2 bg-white text-neutral-800 px-8 py-3 rounded-full font-semibold text-lg hover:bg-gray-50 hover:-translate-y-1 transition-all shadow-md"
                 >
-                  Stoffe entdecken
+                  Verkäufer werden
                 </Link>
               </div>
             </div>
@@ -109,34 +109,46 @@ export function Home() {
       {/* Features Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center p-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
                 <Heart className="h-8 w-8 text-primary-500" />
               </div>
               <h3 className="font-bold text-xl text-neutral-800 mb-2">
-                Mit Liebe gemacht
+                Echte Handarbeit
               </h3>
               <p className="text-neutral-600">
-                Jedes Produkt wird mit größter Sorgfalt und Leidenschaft gefertigt.
+                Jedes Produkt ist ein liebevoll gefertigtes Unikat.
               </p>
             </div>
 
             <div className="text-center p-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">
-                <Sparkles className="h-8 w-8 text-secondary-600" />
+                <Users className="h-8 w-8 text-secondary-600" />
               </div>
               <h3 className="font-bold text-xl text-neutral-800 mb-2">
-                Höchste Qualität
+                Lokale Künstler
               </h3>
               <p className="text-neutral-600">
-                Nur die besten Stoffe für ihre Produkte.
+                Unterstütze talentierte Näherinnen und Näher aus der Region.
               </p>
             </div>
 
             <div className="text-center p-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-                <Truck className="h-8 w-8 text-primary-500" />
+                <Sparkles className="h-8 w-8 text-primary-500" />
+              </div>
+              <h3 className="font-bold text-xl text-neutral-800 mb-2">
+                Höchste Qualität
+              </h3>
+              <p className="text-neutral-600">
+                Nur die besten Stoffe für einzigartige Kreationen.
+              </p>
+            </div>
+
+            <div className="text-center p-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">
+                <Truck className="h-8 w-8 text-secondary-600" />
               </div>
               <h3 className="font-bold text-xl text-neutral-800 mb-2">
                 Schneller Versand
@@ -154,10 +166,10 @@ export function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4">
-              Produkt-Highlights
+              Aktuelle Highlights
             </h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
-              Entdecken Sie unsere beliebtesten handgefertigten Kreationen.
+              Entdecke die neuesten handgefertigten Unikate unserer Verkäufer.
             </p>
           </div>
 
@@ -178,7 +190,7 @@ export function Home() {
             </div>
           ) : (
             <p className="text-center text-neutral-500">
-              Noch keine Featured-Produkte vorhanden.
+              Noch keine Produkte vorhanden.
             </p>
           )}
 
@@ -187,30 +199,38 @@ export function Home() {
               to="/shop"
               className="inline-flex items-center gap-2 bg-primary-400 text-white px-8 py-3 rounded-full font-semibold hover:bg-primary-500 transition-colors"
             >
-              Alle Produkte ansehen
+              Alle Unikate ansehen
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section for Sellers */}
       <section className="py-16 bg-gradient-to-r from-primary-400 to-primary-500 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Qualität, die man fühlt
+            Du nähst selbst? Werde Verkäufer!
           </h2>
           <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8">
-            Jeder Stoff wird sorgfältig ausgewählt, um höchste Ansprüche an
-            Haptik, Haltbarkeit und Farbe zu erfüllen.
+            Zeige deine handgefertigten Kreationen der Welt. Registriere dich kostenlos
+            und verkaufe deine Unikate auf unserem Marktplatz.
           </p>
-          <Link
-            to="/stoffe"
-            className="inline-flex items-center gap-2 bg-white text-primary-500 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Stoffe entdecken
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/verkaeufer/registrieren"
+              className="inline-flex items-center gap-2 bg-white text-primary-500 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Jetzt registrieren
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link
+              to="/verkaeufer/login"
+              className="inline-flex items-center gap-2 bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors"
+            >
+              Verkäufer-Login
+            </Link>
+          </div>
         </div>
       </section>
     </>
