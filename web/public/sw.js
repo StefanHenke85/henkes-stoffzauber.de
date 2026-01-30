@@ -1,5 +1,5 @@
-const CACHE_NAME = 'henkes-stoffzauber-v1';
-const API_CACHE = 'henkes-stoffzauber-api-v1';
+const CACHE_NAME = 'henkes-stoffzauber-v2';
+const API_CACHE = 'henkes-stoffzauber-api-v2';
 
 // Assets to cache on install
 const STATIC_ASSETS = [

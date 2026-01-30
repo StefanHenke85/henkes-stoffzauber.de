@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Info, Loader2, Palette, Search, Filter } from 'lucide-react';
 import { fabricsApi } from '@/utils/api';
+import { getImageUrl } from '@/utils/helpers';
 import type { Fabric } from '@/types';
 
 export function Stoffe() {
@@ -63,12 +64,15 @@ export function Stoffe() {
 
       <div className="min-h-screen bg-neutral-50">
         {/* Header with Banner Background */}
-        <div className="relative py-16 overflow-hidden">
+        <div className="relative py-12 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
-              src="/api/uploads/1764276141636-banner.jpg"
+              src="/uploads/1764276141636-banner.jpg"
               alt="Banner"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-secondary-100/90 to-primary-100/90"></div>
           </div>
@@ -168,10 +172,11 @@ export function Stoffe() {
                   <div className="aspect-[4/3] overflow-hidden bg-neutral-100">
                     {fabric.imageUrl ? (
                       <img
-                        src={fabric.imageUrl}
+                        src={getImageUrl(fabric.thumbnailUrl || fabric.imageUrl, fabric.imageUrlWebp)}
                         alt={fabric.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                         loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

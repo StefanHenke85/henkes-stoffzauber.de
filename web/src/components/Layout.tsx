@@ -1,18 +1,55 @@
-import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Menu, X, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { cn } from '@/utils/helpers';
+import { tailorAuthApi } from '@/utils/api';
+import toast from 'react-hot-toast';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+interface TailorUser {
+  id: string;
+  name: string;
+  username: string;
+}
+
 export function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [tailor, setTailor] = useState<TailorUser | null>(null);
   const { itemCount } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if tailor is logged in
+  useEffect(() => {
+    const storedTailor = localStorage.getItem('tailor');
+    if (storedTailor) {
+      try {
+        setTailor(JSON.parse(storedTailor));
+      } catch {
+        localStorage.removeItem('tailor');
+      }
+    } else {
+      setTailor(null);
+    }
+  }, [location.pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await tailorAuthApi.logout();
+    } catch {
+      // Ignore logout errors
+    }
+    localStorage.removeItem('tailor');
+    localStorage.removeItem('tailor_token');
+    setTailor(null);
+    toast.success('Erfolgreich abgemeldet');
+    navigate('/');
+  };
 
   const navLinks = [
     { href: '/', label: 'Startseite' },
@@ -36,7 +73,7 @@ export function Layout({ children }: LayoutProps) {
               aria-label="Zur Startseite"
             >
               <img
-                src="/logo.jpg"
+                src="/api/uploads/logo.jpg"
                 alt="Henkes Stoffzauber Logo"
                 className="h-12 w-12 rounded-full border-3 border-white shadow-md transition-transform group-hover:rotate-[-6deg] group-hover:scale-105"
                 loading="eager"
@@ -76,8 +113,43 @@ export function Layout({ children }: LayoutProps) {
                 )}
               </Link>
 
-            
-              
+              {/* Seller Links - direkt in der Nav */}
+              {tailor ? (
+                <>
+                  <Link
+                    to="/verkaeufer/dashboard"
+                    className={cn(
+                      'px-4 py-2 rounded-full font-semibold text-white transition-all flex items-center gap-2',
+                      'hover:bg-white/30 hover:-translate-y-0.5',
+                      location.pathname.startsWith('/verkaeufer') && 'bg-white/40'
+                    )}
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-full font-semibold text-white transition-all flex items-center gap-2 hover:bg-white/30 hover:-translate-y-0.5"
+                    aria-label="Abmelden"
+                    title="Abmelden"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/verkaeufer/login"
+                  className={cn(
+                    'px-4 py-2 rounded-full font-semibold text-white transition-all flex items-center gap-2 border-2 border-white/50',
+                    'hover:bg-white/30 hover:-translate-y-0.5',
+                    location.pathname.startsWith('/verkaeufer') && 'bg-white/40'
+                  )}
+                >
+                  <LogIn className="h-5 w-5" />
+                  Verkäufer-Login
+                </Link>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -119,7 +191,39 @@ export function Layout({ children }: LayoutProps) {
                   <ShoppingCart className="h-5 w-5" />
                   Warenkorb ({itemCount})
                 </Link>
-              
+
+                {/* Mobile Seller Links */}
+                <div className="border-t border-white/20 mt-2 pt-2">
+                  {tailor ? (
+                    <>
+                      <Link
+                        to="/verkaeufer/dashboard"
+                        onClick={() => setMenuOpen(false)}
+                        className="px-4 py-3 rounded-lg font-semibold text-white hover:bg-white/20 flex items-center gap-2"
+                      >
+                        <LayoutDashboard className="h-5 w-5" />
+                        Dashboard ({tailor.name})
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => { handleLogout(); setMenuOpen(false); }}
+                        className="w-full px-4 py-3 rounded-lg font-semibold text-white hover:bg-white/20 flex items-center gap-2"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        Abmelden
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      to="/verkaeufer/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="px-4 py-3 rounded-lg font-semibold text-white hover:bg-white/20 flex items-center gap-2"
+                    >
+                      <LogIn className="h-5 w-5" />
+                      Verkäufer-Login
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           )}

@@ -1,45 +1,10 @@
 import { Router } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
-import fs from 'fs/promises';
-import path from 'path';
-import { generateId } from '../utils/helpers';
+import { supabase } from '../config/supabase';
 import { logger } from '../utils/logger';
 
 const router = Router();
-const vouchersFilePath = path.resolve('./data/vouchers.json');
-
-// Voucher interface
-interface Voucher {
-  id: string;
-  code: string;
-  value: number;
-  isPercentage?: boolean;
-  isUsed: boolean;
-  usedBy?: string;
-  usedAt?: string;
-  createdAt: string;
-}
-
-// Load vouchers
-async function loadVouchers(): Promise<Voucher[]> {
-  try {
-    const data = await fs.readFile(vouchersFilePath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    // If file doesn't exist, create it with empty array
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      await fs.writeFile(vouchersFilePath, JSON.stringify([], null, 2));
-      return [];
-    }
-    throw error;
-  }
-}
-
-// Save vouchers
-async function saveVouchers(vouchers: Voucher[]): Promise<void> {
-  await fs.writeFile(vouchersFilePath, JSON.stringify(vouchers, null, 2));
-}
 
 // Generate voucher code
 function generateVoucherCode(): string {
@@ -54,7 +19,16 @@ function generateVoucherCode(): string {
 // GET /api/vouchers - Get all vouchers (Admin only)
 router.get('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const vouchers = await loadVouchers();
+    const { data: vouchers, error } = await supabase
+      .from('vouchers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error('Error loading vouchers:', error);
+      return res.status(500).json({ success: false, error: 'Failed to load vouchers' });
+    }
+
     res.json({ success: true, data: vouchers });
   } catch (error) {
     logger.error('Error loading vouchers:', error);
@@ -74,10 +48,15 @@ router.post(
 
     try {
       const { code } = req.body;
-      const vouchers = await loadVouchers();
-      const voucher = vouchers.find(v => v.code.toUpperCase() === code.toUpperCase() && !v.isUsed);
 
-      if (!voucher) {
+      const { data: voucher, error } = await supabase
+        .from('vouchers')
+        .select('*')
+        .ilike('code', code)
+        .eq('is_used', false)
+        .single();
+
+      if (error || !voucher) {
         return res.status(404).json({
           success: false,
           error: 'Ungültiger oder bereits verwendeter Gutscheincode',
@@ -89,7 +68,7 @@ router.post(
         data: {
           code: voucher.code,
           value: voucher.value,
-          isPercentage: voucher.isPercentage || false,
+          isPercentage: voucher.is_percentage || false,
         },
       });
     } catch (error) {
@@ -112,26 +91,39 @@ router.post(
 
     try {
       const { code, customerEmail } = req.body;
-      const vouchers = await loadVouchers();
-      const voucherIndex = vouchers.findIndex(
-        v => v.code.toUpperCase() === code.toUpperCase() && !v.isUsed
-      );
 
-      if (voucherIndex === -1) {
+      const { data: voucher, error: fetchError } = await supabase
+        .from('vouchers')
+        .select('*')
+        .ilike('code', code)
+        .eq('is_used', false)
+        .single();
+
+      if (fetchError || !voucher) {
         return res.status(404).json({
           success: false,
           error: 'Ungültiger oder bereits verwendeter Gutscheincode',
         });
       }
 
-      vouchers[voucherIndex].isUsed = true;
-      vouchers[voucherIndex].usedBy = customerEmail;
-      vouchers[voucherIndex].usedAt = new Date().toISOString();
+      const { data: updatedVoucher, error: updateError } = await supabase
+        .from('vouchers')
+        .update({
+          is_used: true,
+          used_by: customerEmail,
+          used_at: new Date().toISOString(),
+        })
+        .eq('id', voucher.id)
+        .select()
+        .single();
 
-      await saveVouchers(vouchers);
+      if (updateError) {
+        logger.error('Error using voucher:', updateError);
+        return res.status(500).json({ success: false, error: 'Failed to use voucher' });
+      }
+
       logger.info(`Voucher ${code} used by ${customerEmail}`);
-
-      res.json({ success: true, data: vouchers[voucherIndex] });
+      res.json({ success: true, data: updatedVoucher });
     } catch (error) {
       logger.error('Error using voucher:', error);
       res.status(500).json({ success: false, error: 'Failed to use voucher' });
@@ -153,20 +145,28 @@ router.post(
 
     try {
       const { value } = req.body;
-      const vouchers = await loadVouchers();
+      const voucherId = `${Date.now()}`;
 
-      const newVoucher: Voucher = {
-        id: generateId(),
+      const newVoucherData = {
+        id: voucherId,
         code: generateVoucherCode(),
         value: parseFloat(value),
-        isUsed: false,
-        createdAt: new Date().toISOString(),
+        is_percentage: false,
+        is_used: false,
       };
 
-      vouchers.push(newVoucher);
-      await saveVouchers(vouchers);
-      logger.info(`New voucher created: ${newVoucher.code} (${value}€)`);
+      const { data: newVoucher, error } = await supabase
+        .from('vouchers')
+        .insert(newVoucherData)
+        .select()
+        .single();
 
+      if (error) {
+        logger.error('Error creating voucher:', error);
+        return res.status(500).json({ success: false, error: 'Failed to create voucher' });
+      }
+
+      logger.info(`New voucher created: ${newVoucher.code} (${value}€)`);
       res.status(201).json({ success: true, data: newVoucher });
     } catch (error) {
       logger.error('Error creating voucher:', error);
@@ -184,16 +184,18 @@ router.delete(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const vouchers = await loadVouchers();
-      const filteredVouchers = vouchers.filter(v => v.id !== id);
 
-      if (filteredVouchers.length === vouchers.length) {
+      const { error } = await supabase
+        .from('vouchers')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        logger.error('Error deleting voucher:', error);
         return res.status(404).json({ success: false, error: 'Voucher not found' });
       }
 
-      await saveVouchers(filteredVouchers);
       logger.info(`Voucher ${id} deleted`);
-
       res.json({ success: true, message: 'Voucher deleted successfully' });
     } catch (error) {
       logger.error('Error deleting voucher:', error);

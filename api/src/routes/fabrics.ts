@@ -1,5 +1,5 @@
 import { Router, Response, Request } from 'express';
-import { fabricsStore, Fabric } from '../data/jsonStore';
+import { supabase, DbFabric } from '../config/supabase';
 import { AuthRequest, ApiResponse } from '../types';
 import {
   authenticateToken,
@@ -9,6 +9,7 @@ import {
 } from '../middleware';
 import { processImage, deleteImage } from '../services';
 import { logger } from '../utils/logger';
+import { transformDbToApi } from '../utils/helpers';
 
 const router = Router();
 
@@ -18,10 +19,23 @@ const router = Router();
  */
 router.get('/', async (_req: Request, res: Response<ApiResponse>) => {
   try {
-    const fabrics = fabricsStore.getActive();
+    const { data: fabrics, error } = await supabase
+      .from('fabrics')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error('Get fabrics error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Fehler beim Laden der Stoffe',
+      });
+    }
+
     res.json({
       success: true,
-      data: fabrics,
+      data: transformDbToApi(fabrics),
     });
   } catch (error) {
     logger.error('Get fabrics error:', error);
@@ -38,10 +52,25 @@ router.get('/', async (_req: Request, res: Response<ApiResponse>) => {
  */
 router.get('/featured', async (_req: Request, res: Response<ApiResponse>) => {
   try {
-    const fabrics = fabricsStore.getFeatured().slice(0, 8);
+    const { data: fabrics, error } = await supabase
+      .from('fabrics')
+      .select('*')
+      .eq('is_active', true)
+      .eq('is_featured', true)
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    if (error) {
+      logger.error('Get featured fabrics error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Fehler beim Laden der Featured-Stoffe',
+      });
+    }
+
     res.json({
       success: true,
-      data: fabrics,
+      data: transformDbToApi(fabrics),
     });
   } catch (error) {
     logger.error('Get featured fabrics error:', error);
@@ -62,9 +91,18 @@ router.get(
   requireAdmin,
   async (_req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const fabrics = fabricsStore.getAll();
-      // Sort by createdAt descending
-      fabrics.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const { data: fabrics, error } = await supabase
+        .from('fabrics')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        logger.error('Admin get fabrics error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Laden der Stoffe',
+        });
+      }
 
       res.json({
         success: true,
@@ -86,19 +124,22 @@ router.get(
  */
 router.get('/:id', async (req: Request, res: Response<ApiResponse>) => {
   try {
-    const fabric = fabricsStore.getById(req.params.id);
+    const { data: fabric, error } = await supabase
+      .from('fabrics')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
 
-    if (!fabric) {
-      res.status(404).json({
+    if (error || !fabric) {
+      return res.status(404).json({
         success: false,
         error: 'Stoff nicht gefunden',
       });
-      return;
     }
 
     res.json({
       success: true,
-      data: fabric,
+      data: transformDbToApi(fabric),
     });
   } catch (error) {
     logger.error('Get fabric error:', error);
@@ -140,26 +181,42 @@ router.post(
         }
       }
 
-      const fabric = fabricsStore.create({
+      const fabricId = `${Date.now()}`;
+      const fabricData = {
+        id: fabricId,
         name: name || '',
         description: description || '',
-        fabricType: fabricType || '',
-        color: color || '',
-        pattern: pattern || '',
-        material: material || '',
-        width: width ? Number(width) : undefined,
-        isFeatured: isFeatured === 'true' || isFeatured === true,
-        isActive: true,
-        imageUrl,
-        imageUrlWebp,
-        thumbnailUrl,
-      });
+        fabric_type: fabricType || '',
+        color: color || null,
+        pattern: pattern || null,
+        material: material || null,
+        width: width ? Number(width) : null,
+        is_featured: isFeatured === 'true' || isFeatured === true,
+        is_active: true,
+        image_url: imageUrl,
+        image_url_webp: imageUrlWebp || null,
+        thumbnail_url: thumbnailUrl || null,
+      };
+
+      const { data: fabric, error } = await supabase
+        .from('fabrics')
+        .insert(fabricData)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Create fabric error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Erstellen des Stoffes',
+        });
+      }
 
       logger.info(`Fabric created: ${fabric.id} by ${req.user?.username}`);
 
       res.status(201).json({
         success: true,
-        data: fabric,
+        data: transformDbToApi(fabric),
         message: 'Stoff erstellt',
       });
     } catch (error) {
@@ -184,57 +241,73 @@ router.put(
   handleMulterError,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const existingFabric = fabricsStore.getById(req.params.id);
+      const { data: existingFabric, error: fetchError } = await supabase
+        .from('fabrics')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
 
-      if (!existingFabric) {
-        res.status(404).json({
+      if (fetchError || !existingFabric) {
+        return res.status(404).json({
           success: false,
           error: 'Stoff nicht gefunden',
         });
-        return;
       }
 
-      const updates: Partial<Fabric> = {};
+      const updates: Partial<DbFabric> = {};
 
       if (req.body.name !== undefined) updates.name = req.body.name;
       if (req.body.description !== undefined) updates.description = req.body.description;
-      if (req.body.fabricType !== undefined) updates.fabricType = req.body.fabricType;
+      if (req.body.fabricType !== undefined) updates.fabric_type = req.body.fabricType;
       if (req.body.color !== undefined) updates.color = req.body.color;
       if (req.body.pattern !== undefined) updates.pattern = req.body.pattern;
       if (req.body.material !== undefined) updates.material = req.body.material;
       if (req.body.width !== undefined) updates.width = Number(req.body.width);
       if (req.body.isFeatured !== undefined) {
-        updates.isFeatured = req.body.isFeatured === 'true' || req.body.isFeatured === true;
+        updates.is_featured = req.body.isFeatured === 'true' || req.body.isFeatured === true;
       }
       if (req.body.isActive !== undefined) {
-        updates.isActive = req.body.isActive === 'true' || req.body.isActive === true;
+        updates.is_active = req.body.isActive === 'true' || req.body.isActive === true;
       }
 
       // Handle new image upload
       if (req.file) {
         // Delete old images
-        if (existingFabric.imageUrl) {
-          await deleteImage(existingFabric.imageUrl);
+        if (existingFabric.image_url) {
+          await deleteImage(existingFabric.image_url);
         }
 
         try {
           const processed = await processImage(req.file.path);
-          updates.imageUrl = processed.original;
-          updates.imageUrlWebp = processed.webp;
-          updates.thumbnailUrl = processed.thumbnail;
+          updates.image_url = processed.original;
+          updates.image_url_webp = processed.webp;
+          updates.thumbnail_url = processed.thumbnail;
         } catch (imgError) {
           logger.error('Image processing error:', imgError);
-          updates.imageUrl = `/uploads/${req.file.filename}`;
+          updates.image_url = `/uploads/${req.file.filename}`;
         }
       }
 
-      const fabric = fabricsStore.update(req.params.id, updates);
+      const { data: fabric, error } = await supabase
+        .from('fabrics')
+        .update(updates)
+        .eq('id', req.params.id)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Update fabric error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Aktualisieren des Stoffes',
+        });
+      }
 
       logger.info(`Fabric updated: ${req.params.id} by ${req.user?.username}`);
 
       res.json({
         success: true,
-        data: fabric,
+        data: transformDbToApi(fabric),
         message: 'Stoff aktualisiert',
       });
     } catch (error) {
@@ -257,22 +330,36 @@ router.delete(
   requireAdmin,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const fabric = fabricsStore.getById(req.params.id);
+      const { data: fabric, error: fetchError } = await supabase
+        .from('fabrics')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
 
-      if (!fabric) {
-        res.status(404).json({
+      if (fetchError || !fabric) {
+        return res.status(404).json({
           success: false,
           error: 'Stoff nicht gefunden',
         });
-        return;
       }
 
       // Delete associated images
-      if (fabric.imageUrl) {
-        await deleteImage(fabric.imageUrl);
+      if (fabric.image_url) {
+        await deleteImage(fabric.image_url);
       }
 
-      fabricsStore.delete(req.params.id);
+      const { error } = await supabase
+        .from('fabrics')
+        .delete()
+        .eq('id', req.params.id);
+
+      if (error) {
+        logger.error('Delete fabric error:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler beim Löschen des Stoffes',
+        });
+      }
 
       logger.info(`Fabric deleted: ${req.params.id} by ${req.user?.username}`);
 

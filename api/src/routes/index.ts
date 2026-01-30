@@ -5,6 +5,8 @@ import authRouter from './auth';
 import fabricsRouter from './fabrics';
 import vouchersRouter from './vouchers';
 import patternsRouter from './patterns';
+import tailorsRouter from './tailors';
+import tailorAuthRouter from './tailor-auth';
 
 const router = Router();
 
@@ -16,6 +18,8 @@ router.use('/auth', authRouter);
 router.use('/fabrics', fabricsRouter);
 router.use('/vouchers', vouchersRouter);
 router.use('/patterns', patternsRouter);
+router.use('/tailors', tailorsRouter);
+router.use('/tailor-auth', tailorAuthRouter);
 
 // Legacy route support (for backwards compatibility)
 router.use('/admin', authRouter);

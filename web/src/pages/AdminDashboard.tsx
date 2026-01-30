@@ -16,6 +16,7 @@ import {
   Download,
   Tag,
   Scissors,
+  Users,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,10 +29,11 @@ import {
 import { CameraCapture } from '@/components/CameraCapture';
 import { AdminVouchers } from '@/components/AdminVouchers';
 import { AdminPatterns } from '@/components/AdminPatterns';
+import { AdminTailors } from '@/components/AdminTailors';
 import { FabricScalePreview } from '@/components/FabricScalePreview';
 import type { Product, Order, Fabric } from '@/types';
 
-type Tab = 'products' | 'orders' | 'fabrics' | 'vouchers' | 'patterns';
+type Tab = 'products' | 'orders' | 'fabrics' | 'vouchers' | 'patterns' | 'tailors';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -486,6 +488,18 @@ export function AdminDashboard() {
               >
                 <Scissors className="h-4 w-4" />
                 Schnittmuster
+              </button>
+              <button
+                onClick={() => setActiveTab('tailors')}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+                  activeTab === 'tailors'
+                    ? 'bg-primary-400 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                )}
+              >
+                <Users className="h-4 w-4" />
+                Verkäufer
               </button>
             </div>
           </div>
@@ -1549,6 +1563,13 @@ export function AdminDashboard() {
       {activeTab === 'patterns' && (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <AdminPatterns />
+        </main>
+      )}
+
+      {/* Tailors Tab */}
+      {activeTab === 'tailors' && (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <AdminTailors />
         </main>
       )}
 

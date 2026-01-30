@@ -1,6 +1,6 @@
 import { Router, Response, Request } from 'express';
 import bcrypt from 'bcryptjs';
-import { adminsStore } from '../data/jsonStore';
+import { supabase } from '../config/supabase';
 import { AuthRequest, ApiResponse } from '../types';
 import {
   authenticateToken,
@@ -16,16 +16,28 @@ const router = Router();
 
 // Ensure initial admin exists
 async function ensureInitialAdmin() {
-  if (!adminsStore.exists()) {
-    const passwordHash = await bcrypt.hash(env.ADMIN_PASSWORD, 12);
-    adminsStore.create({
-      username: env.ADMIN_USERNAME,
-      email: env.ADMIN_EMAIL,
-      passwordHash,
-      role: 'superadmin',
-      isActive: true,
-    });
-    logger.info(`Initial admin created: ${env.ADMIN_USERNAME}`);
+  try {
+    const { data: existingAdmins, error } = await supabase
+      .from('admins')
+      .select('count');
+
+    if (error || !existingAdmins || existingAdmins.length === 0) {
+      const passwordHash = await bcrypt.hash(env.ADMIN_PASSWORD, 12);
+      const adminId = `${Date.now()}`;
+
+      await supabase.from('admins').insert({
+        id: adminId,
+        username: env.ADMIN_USERNAME,
+        email: env.ADMIN_EMAIL,
+        password_hash: passwordHash,
+        role: 'superadmin',
+        is_active: true,
+      });
+
+      logger.info(`Initial admin created: ${env.ADMIN_USERNAME}`);
+    }
+  } catch (error) {
+    logger.error('Failed to ensure initial admin:', error);
   }
 }
 
@@ -44,43 +56,46 @@ router.post(
       const { username, password } = req.body;
 
       if (!username || !password) {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
           error: 'Benutzername und Passwort erforderlich',
         });
-        return;
       }
 
-      const admin = adminsStore.getByUsername(username);
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('username', username)
+        .single();
 
-      if (!admin) {
-        res.status(401).json({
+      if (error || !admin) {
+        return res.status(401).json({
           success: false,
           error: 'Ungültige Anmeldedaten',
         });
-        return;
       }
 
-      if (!admin.isActive) {
-        res.status(401).json({
+      if (!admin.is_active) {
+        return res.status(401).json({
           success: false,
           error: 'Konto deaktiviert',
         });
-        return;
       }
 
-      const isPasswordValid = await bcrypt.compare(password, admin.passwordHash);
+      const isPasswordValid = await bcrypt.compare(password, admin.password_hash);
 
       if (!isPasswordValid) {
-        res.status(401).json({
+        return res.status(401).json({
           success: false,
           error: 'Ungültige Anmeldedaten',
         });
-        return;
       }
 
       // Update last login
-      adminsStore.update(admin.id, { lastLogin: new Date().toISOString() });
+      await supabase
+        .from('admins')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', admin.id);
 
       // Generate JWT token
       const token = generateToken({
@@ -138,14 +153,17 @@ router.get(
   authenticateToken,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const admin = adminsStore.getById(req.user!.userId);
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('id', req.user!.userId)
+        .single();
 
-      if (!admin || !admin.isActive) {
-        res.status(401).json({
+      if (error || !admin || !admin.is_active) {
+        return res.status(401).json({
           success: false,
           error: 'Ungültiger Benutzer',
         });
-        return;
       }
 
       res.json({
@@ -178,14 +196,17 @@ router.get(
   authenticateToken,
   async (req: AuthRequest, res: Response<ApiResponse>) => {
     try {
-      const admin = adminsStore.getById(req.user!.userId);
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('id', req.user!.userId)
+        .single();
 
-      if (!admin || !admin.isActive) {
-        res.status(401).json({
+      if (error || !admin || !admin.is_active) {
+        return res.status(401).json({
           success: false,
           error: 'Ungültiger Benutzer',
         });
-        return;
       }
 
       res.json({

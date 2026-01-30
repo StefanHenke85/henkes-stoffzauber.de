@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   FileText,
   Archive,
@@ -14,6 +14,10 @@ import {
   Link2,
   Trash2,
   Filter,
+  RefreshCw,
+  Plus,
+  ImagePlus,
+  Link as LinkIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { patternsApi } from '@/utils/api';
@@ -27,6 +31,9 @@ interface Pattern {
   sizeFormatted: string;
   createdAt: string;
   modifiedAt: string;
+  hasThumbnail: boolean;
+  thumbnailUrl: string | null;
+  tailorId: string | null;
 }
 
 interface ShareLink {
@@ -58,6 +65,21 @@ export function AdminPatterns() {
   const [showActiveShares, setShowActiveShares] = useState(false);
   const [activeShares, setActiveShares] = useState<ShareLink[]>([]);
   const [sharesLoading, setSharesLoading] = useState(false);
+
+  // Sync & Upload
+  const [syncing, setSyncing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Delete
+  const [deletePattern, setDeletePattern] = useState<Pattern | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Thumbnail Upload
+  const [thumbnailPattern, setThumbnailPattern] = useState<Pattern | null>(null);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [thumbnailUrlInput, setThumbnailUrlInput] = useState('');
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadPatterns();
@@ -148,6 +170,123 @@ export function AdminPatterns() {
     }
   };
 
+  const handleSync = async () => {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      const response = await patternsApi.sync();
+      const data = response.data;
+      if (data) {
+        toast.success(`Sync abgeschlossen: ${data.added} neu, ${data.skipped} übersprungen`);
+        loadPatterns();
+      }
+    } catch (error) {
+      toast.error('Fehler beim Synchronisieren');
+      console.error(error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const file of Array.from(files)) {
+      try {
+        await patternsApi.upload(file);
+        successCount++;
+      } catch (error: any) {
+        errorCount++;
+        const message = error.response?.data?.error || 'Fehler beim Hochladen';
+        toast.error(`${file.name}: ${message}`);
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`${successCount} Datei(en) hochgeladen`);
+      loadPatterns();
+    }
+
+    setUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletePattern) return;
+    setDeleting(true);
+
+    try {
+      await patternsApi.delete(deletePattern.id);
+      toast.success('Schnittmuster gelöscht');
+      setDeletePattern(null);
+      loadPatterns();
+    } catch (error) {
+      toast.error('Fehler beim Löschen');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !thumbnailPattern) return;
+
+    setThumbnailUploading(true);
+    try {
+      await patternsApi.uploadThumbnail(thumbnailPattern.id, file);
+      toast.success('Vorschaubild hochgeladen');
+      setThumbnailPattern(null);
+      loadPatterns();
+    } catch (error) {
+      toast.error('Fehler beim Hochladen des Vorschaubilds');
+    } finally {
+      setThumbnailUploading(false);
+      if (thumbnailInputRef.current) {
+        thumbnailInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleSetThumbnailUrl = async () => {
+    if (!thumbnailPattern || !thumbnailUrlInput.trim()) return;
+
+    setThumbnailUploading(true);
+    try {
+      await patternsApi.setThumbnailUrl(thumbnailPattern.id, thumbnailUrlInput.trim());
+      toast.success('Vorschaubild-URL gesetzt');
+      setThumbnailPattern(null);
+      setThumbnailUrlInput('');
+      loadPatterns();
+    } catch (error) {
+      toast.error('Fehler beim Setzen der URL');
+    } finally {
+      setThumbnailUploading(false);
+    }
+  };
+
+  const handleDeleteThumbnail = async () => {
+    if (!thumbnailPattern) return;
+
+    setThumbnailUploading(true);
+    try {
+      await patternsApi.deleteThumbnail(thumbnailPattern.id);
+      toast.success('Vorschaubild entfernt');
+      setThumbnailPattern(null);
+      loadPatterns();
+    } catch (error) {
+      toast.error('Fehler beim Entfernen des Vorschaubilds');
+    } finally {
+      setThumbnailUploading(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('de-DE', {
       day: '2-digit',
@@ -174,16 +313,47 @@ export function AdminPatterns() {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setShowActiveShares(true);
-            loadActiveShares();
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-secondary-400 text-neutral-800 rounded-lg hover:bg-secondary-500 transition-colors"
-        >
-          <Link2 className="h-4 w-4" />
-          Aktive Links
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleUpload}
+            accept=".pdf,.zip"
+            multiple
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+          >
+            {uploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            {uploading ? 'Lädt...' : 'Hochladen'}
+          </button>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            title="Dateien vom Server mit Datenbank synchronisieren"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Sync...' : 'Sync DB'}
+          </button>
+          <button
+            onClick={() => {
+              setShowActiveShares(true);
+              loadActiveShares();
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-secondary-400 text-neutral-800 rounded-lg hover:bg-secondary-500 transition-colors"
+          >
+            <Link2 className="h-4 w-4" />
+            Aktive Links
+          </button>
+        </div>
       </div>
 
       {/* Search & Filter */}
@@ -233,19 +403,55 @@ export function AdminPatterns() {
               key={pattern.id}
               className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Icon/Preview Area */}
+              {/* Thumbnail/Icon Area */}
               <div
-                className={`h-32 flex items-center justify-center ${
-                  pattern.type === 'pdf'
-                    ? 'bg-red-50'
-                    : 'bg-amber-50'
+                className={`h-40 flex items-center justify-center relative ${
+                  pattern.hasThumbnail ? 'bg-gray-100' : pattern.type === 'pdf' ? 'bg-gray-100' : 'bg-amber-50'
                 }`}
               >
-                {pattern.type === 'pdf' ? (
+                {pattern.hasThumbnail ? (
+                  <img
+                    src={pattern.thumbnailUrl?.startsWith('http') ? pattern.thumbnailUrl : patternsApi.getThumbnailUrl(pattern.id)}
+                    alt={pattern.name}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement?.classList.add('fallback-icon');
+                    }}
+                  />
+                ) : pattern.type === 'pdf' ? (
                   <FileText className="h-16 w-16 text-red-400" />
                 ) : (
                   <Archive className="h-16 w-16 text-amber-500" />
                 )}
+
+                {/* Custom Thumbnail indicator */}
+                {pattern.thumbnailUrl && (
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                    Custom
+                  </span>
+                )}
+
+                {/* Action buttons */}
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <button
+                    onClick={() => {
+                      setThumbnailPattern(pattern);
+                      setThumbnailUrlInput(pattern.thumbnailUrl || '');
+                    }}
+                    className="p-1.5 bg-white/80 hover:bg-blue-50 rounded-full transition-colors"
+                    title="Vorschaubild bearbeiten"
+                  >
+                    <ImagePlus className="h-4 w-4 text-blue-500" />
+                  </button>
+                  <button
+                    onClick={() => setDeletePattern(pattern)}
+                    className="p-1.5 bg-white/80 hover:bg-red-50 rounded-full transition-colors"
+                    title="Löschen"
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </button>
+                </div>
               </div>
 
               {/* Info */}
@@ -422,6 +628,49 @@ export function AdminPatterns() {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {deletePattern && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-red-600">Schnittmuster löschen?</h3>
+              <button
+                onClick={() => setDeletePattern(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-4">
+              Möchtest du <strong>{deletePattern.name}</strong> wirklich löschen?
+              Diese Aktion kann nicht rückgängig gemacht werden.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeletePattern(null)}
+                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                Löschen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Active Shares Modal */}
       {showActiveShares && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -500,6 +749,109 @@ export function AdminPatterns() {
                 Aktualisieren
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Thumbnail Upload Modal */}
+      {thumbnailPattern && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Vorschaubild bearbeiten</h3>
+              <button
+                onClick={() => {
+                  setThumbnailPattern(null);
+                  setThumbnailUrlInput('');
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              <strong>{thumbnailPattern.name}</strong>
+            </p>
+
+            {/* Aktuelles Thumbnail */}
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-2">Aktuelles Bild:</p>
+              <div className="h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                {thumbnailPattern.hasThumbnail ? (
+                  <img
+                    src={thumbnailPattern.thumbnailUrl?.startsWith('http') ? thumbnailPattern.thumbnailUrl : patternsApi.getThumbnailUrl(thumbnailPattern.id)}
+                    alt="Vorschau"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <span className="text-gray-400">Kein Vorschaubild</span>
+                )}
+              </div>
+            </div>
+
+            {/* Option 1: Datei hochladen */}
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Bild hochladen:</p>
+              <input
+                type="file"
+                ref={thumbnailInputRef}
+                onChange={handleThumbnailUpload}
+                accept="image/*"
+                className="hidden"
+                title="Vorschaubild auswählen"
+                aria-label="Vorschaubild auswählen"
+              />
+              <button
+                onClick={() => thumbnailInputRef.current?.click()}
+                disabled={thumbnailUploading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors disabled:opacity-50"
+              >
+                {thumbnailUploading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <ImagePlus className="h-5 w-5 text-gray-500" />
+                )}
+                <span className="text-gray-600">Bild auswählen (JPG, PNG, WebP)</span>
+              </button>
+            </div>
+
+            {/* Option 2: URL eingeben */}
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Oder Bild-URL eingeben (z.B. von stoffe.de):</p>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="url"
+                    value={thumbnailUrlInput}
+                    onChange={(e) => setThumbnailUrlInput(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  />
+                </div>
+                <button
+                  onClick={handleSetThumbnailUrl}
+                  disabled={thumbnailUploading || !thumbnailUrlInput.trim()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Setzen
+                </button>
+              </div>
+            </div>
+
+            {/* Entfernen Button */}
+            {thumbnailPattern.thumbnailUrl && (
+              <button
+                type="button"
+                onClick={handleDeleteThumbnail}
+                disabled={thumbnailUploading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                Benutzerdefiniertes Vorschaubild entfernen
+              </button>
+            )}
           </div>
         </div>
       )}
